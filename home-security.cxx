@@ -26,6 +26,8 @@
 
 #include <signal.h>
 
+#include "home-security-email.h"
+
 
 bool signal_recieved = false;
 
@@ -168,5 +170,6 @@ int main( int argc, char** argv )
     SAFE_DELETE(net);
 
     printf("\nhome-security:  shutdown complete.\n");
+    send_email();
     return 0;
 }

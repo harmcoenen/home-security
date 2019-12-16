@@ -50,9 +50,15 @@ if(CUDA_VERSION_MAJOR GREATER 9)
 endif()
 message("-- CUDA_NVCC_FLAGS: ${CUDA_NVCC_FLAGS}")
 
+# Find cURL
+find_package(CURL REQUIRED)
+message("-- CURL_INCLUDE_DIR: ${CURL_INCLUDE_DIR}")
+message("-- CURL_LIBRARIES: ${CURL_LIBRARIES}")
+
 # Include
 #include_directories( ${CUDA_INCLUDE_DIRS} )
 include_directories( ${GST_INCLUDE_DIRS} )
+include_directories( ${CURL_INCLUDE_DIR} )
 
 file(GLOB home-securitySources *.cxx)
 file(GLOB home-securityIncludes *.h)
@@ -62,7 +68,7 @@ cuda_add_executable(home-security ${home-securitySources})
 #add_executable(home-security ${home-securitySources})
 
 # Link home-security to the jetson-inference library
-target_link_libraries(home-security jetson-inference jetson-utils)
+target_link_libraries(home-security jetson-inference jetson-utils curl)
 
 install(TARGETS home-security DESTINATION bin)
 
