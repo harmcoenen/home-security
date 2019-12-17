@@ -27,6 +27,7 @@
 #include <signal.h>
 
 #include "home-security-email.h"
+#include "emailMessage.h"
 
 
 bool signal_recieved = false;
@@ -149,6 +150,8 @@ int main( int argc, char** argv )
         
         if( numDetections > 0 )
         {
+            emailMessage new_message(numDetections, detections);
+
             printf("\n%i objects detected", numDetections);
         
             for( int n=0; n < numDetections; n++ )
