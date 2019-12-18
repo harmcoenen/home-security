@@ -25,7 +25,6 @@
 #include <jetson-inference/detectNet.h>
 #include <signal.h>
 
-#include "home-security-email.h"
 #include "emailMessage.h"
 
 
@@ -149,21 +148,26 @@ int main( int argc, char** argv )
         
         if( numDetections > 0 )
         {
-            emailMessage email(numDetections, detections);
-            email.printHeader();
-            email.printInlineText();
-            email.printInlineHTML();
-
+            /* Print the details for the detected objects */
             printf("\n%i objects detected", numDetections);
-/*
+
             for( int n=0; n < numDetections; n++ )
             {
                 printf("\ndetected obj %i  class #%u (%s)  confidence=%f", n, detections[n].ClassID, net->GetClassDesc(detections[n].ClassID), detections[n].Confidence);
                 printf("\nbounding box %i  (%f, %f)  (%f, %f)  w=%f  h=%f", n, detections[n].Left, detections[n].Top, detections[n].Right, detections[n].Bottom, detections[n].Width(), detections[n].Height()); 
             }
-*/
-        }   
 
+            /* Construct dynamically a new email message */
+            emailMessage email(numDetections, detections);
+
+            /* Print the constructed header and inline data */
+            email.printHeader();
+            email.printInlineText();
+            email.printInlineHTML();
+
+            /* Send the email */
+            email.send();  // To Do: Check if return value is CURLE_OK
+        }   
     }
 
     /*
@@ -176,6 +180,5 @@ int main( int argc, char** argv )
     SAFE_DELETE(net);
 
     printf("\nhome-security:  shutdown complete.\n");
-    send_email();
     return 0;
 }

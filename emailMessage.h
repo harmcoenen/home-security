@@ -1,11 +1,14 @@
 #ifndef __EMAIL_MESSAGE_H__
 #define __EMAIL_MESSAGE_H__
 
-#include <jetson-utils/commandLine.h>
-#include <jetson-inference/detectNet.h>
+#include <stdio.h>
 #include <iostream>
 #include <vector>
 #include <string>
+#include <curl/curl.h>
+#include <jetson-utils/commandLine.h>
+#include <jetson-inference/detectNet.h>
+
 
 #define SMTP_URL "smtp://smtp.ziggo.nl"
 #define FROM    "<jetson@familiecoenen.nl>"
@@ -33,6 +36,8 @@ class emailMessage {
 public:
     emailMessage( const int, detectNet::Detection* );
     ~emailMessage();
+
+    int send( void );
 
     void printHeader( void );
     void printInlineText( void );
