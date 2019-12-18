@@ -23,7 +23,6 @@
 #include <jetson-utils/gstCamera.h>
 #include <jetson-utils/commandLine.h>
 #include <jetson-inference/detectNet.h>
-
 #include <signal.h>
 
 #include "home-security-email.h"
@@ -150,15 +149,19 @@ int main( int argc, char** argv )
         
         if( numDetections > 0 )
         {
-            emailMessage new_message(numDetections, detections);
+            emailMessage email(numDetections, detections);
+            email.printHeader();
+            email.printInlineText();
+            email.printInlineHTML();
 
             printf("\n%i objects detected", numDetections);
-        
+/*
             for( int n=0; n < numDetections; n++ )
             {
                 printf("\ndetected obj %i  class #%u (%s)  confidence=%f", n, detections[n].ClassID, net->GetClassDesc(detections[n].ClassID), detections[n].Confidence);
                 printf("\nbounding box %i  (%f, %f)  (%f, %f)  w=%f  h=%f", n, detections[n].Left, detections[n].Top, detections[n].Right, detections[n].Bottom, detections[n].Width(), detections[n].Height()); 
             }
+*/
         }   
 
     }
