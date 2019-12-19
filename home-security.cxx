@@ -137,10 +137,16 @@ int main( int argc, char** argv )
     while( !signal_recieved )
     {
         // capture RGBA image
+        GError *err = NULL;
+        void* cpu = NULL;
+        void* gpu = NULL;
         float* imgRGBA = NULL;
-        
-        if( !camera->CaptureRGBA(&imgRGBA, 1000) )
-            printf("\nhome-security:  failed to capture RGBA image from camera");
+
+        if( !camera->Capture(&cpu, &gpu, 1000) )
+            printf("\nhome-security: failed to capture frame\n");
+
+        if( !camera->ConvertRGBA(gpu, &imgRGBA, false) )
+            printf("\nhome-security: failed to convert frame to RGBA\n");
 
         // detect objects in the frame
         detectNet::Detection* detections = NULL;
@@ -158,20 +164,11 @@ int main( int argc, char** argv )
                 printf("\nbounding box %i  (%f, %f)  (%f, %f)  w=%f  h=%f", n, detections[n].Left, detections[n].Top, detections[n].Right, detections[n].Bottom, detections[n].Width(), detections[n].Height());
             }
 
-            GError *err = NULL;
-            void* cpu = NULL;
-            void* gpu = NULL;
-            const uint32_t imgSize = camera->GetSize();
+            printf( "\nImage width is %i, height is %i, size is %i", camera->GetWidth(), camera->GetHeight(), camera->GetSize() );
 
-            printf( "\nImage Width is %i, Height is %i, Size is %i", camera->GetWidth(), camera->GetHeight(), camera->GetSize() );
-
-            if( !camera->Capture(&cpu, &gpu, 1000) ) {
-                printf("\nhome-security:  failed to capture cpu image from camera");
-            } else {
-                if ( !g_file_set_contents( "/home/nano/Pictures/picture.yuv",(const char *) cpu, imgSize, &err ) ) {
-                    printf("Could not save picture: %s", err->message);
-                    g_error_free( err );
-                }
+            if ( !g_file_set_contents( "/home/nano/Pictures/picture.yuv", (const char *) cpu, camera->GetSize(), &err ) ) {
+                printf("Could not save picture: %s", err->message);
+                g_error_free( err );
             }
 
             /* Construct dynamically a new email message */
