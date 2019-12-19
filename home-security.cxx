@@ -24,6 +24,7 @@
 #include <jetson-utils/commandLine.h>
 #include <jetson-inference/detectNet.h>
 #include <signal.h>
+#include <glib.h>
 
 #include "emailMessage.h"
 
@@ -97,7 +98,7 @@ int main( int argc, char** argv )
     printf("\n    width:  %u", camera->GetWidth());
     printf("\n   height:  %u", camera->GetHeight());
     printf("\n    depth:  %u (bpp)\n", camera->GetPixelDepth());
-    
+
 
     /*
      * create detection network
@@ -116,7 +117,7 @@ int main( int argc, char** argv )
 
     // parse overlay flags
     const uint32_t overlayFlags = detectNet::OverlayFlagsFromStr(cmdLine.GetString("overlay", "box,labels,conf"));
-    
+
 
     /*
      * start streaming
@@ -126,10 +127,10 @@ int main( int argc, char** argv )
         printf("\nhome-security:  failed to open camera for streaming\n");
         return 0;
     }
-    
+
     printf("\nhome-security:  camera open for streaming");
-    
-    
+
+
     /*
      * processing loop
      */
@@ -154,7 +155,23 @@ int main( int argc, char** argv )
             for( int n=0; n < numDetections; n++ )
             {
                 printf("\ndetected obj %i  class #%u (%s)  confidence=%f", n, detections[n].ClassID, net->GetClassDesc(detections[n].ClassID), detections[n].Confidence);
-                printf("\nbounding box %i  (%f, %f)  (%f, %f)  w=%f  h=%f", n, detections[n].Left, detections[n].Top, detections[n].Right, detections[n].Bottom, detections[n].Width(), detections[n].Height()); 
+                printf("\nbounding box %i  (%f, %f)  (%f, %f)  w=%f  h=%f", n, detections[n].Left, detections[n].Top, detections[n].Right, detections[n].Bottom, detections[n].Width(), detections[n].Height());
+            }
+
+            GError *err = NULL;
+            void* cpu = NULL;
+            void* gpu = NULL;
+            const uint32_t imgSize = camera->GetSize();
+
+            printf( "\nImage Width is %i, Height is %i, Size is %i", camera->GetWidth(), camera->GetHeight(), camera->GetSize() );
+
+            if( !camera->Capture(&cpu, &gpu, 1000) ) {
+                printf("\nhome-security:  failed to capture cpu image from camera");
+            } else {
+                if ( !g_file_set_contents( "/home/nano/Pictures/picture.yuv",(const char *) cpu, imgSize, &err ) ) {
+                    printf("Could not save picture: %s", err->message);
+                    g_error_free( err );
+                }
             }
 
             /* Construct dynamically a new email message */
@@ -167,16 +184,15 @@ int main( int argc, char** argv )
 
             /* Send the email */
             email.send();  // To Do: Check if return value is CURLE_OK
-        }   
+        }
     }
 
     /*
      * destroy resources
      */
     printf("\nhome-security:  shutting down...");
-    
+
     SAFE_DELETE(camera);
-    //SAFE_DELETE(display);
     SAFE_DELETE(net);
 
     printf("\nhome-security:  shutdown complete.\n");

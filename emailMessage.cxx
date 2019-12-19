@@ -146,6 +146,6 @@ void emailMessage::print( std::vector<std::string> vs ) {
 
     // Print Strings stored in Vector
     std::cout << std::endl;
-    for( int i = 0; i < vs.size(); i++ ) 
-        std::cout << vs[i] << std::endl; 
+    for( int i = 0; i < vs.size(); i++ )
+        std::cout << vs[i] << std::endl;
 }

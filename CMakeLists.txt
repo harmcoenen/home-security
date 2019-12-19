@@ -55,6 +55,12 @@ find_package(CURL REQUIRED)
 message("-- CURL_INCLUDE_DIR: ${CURL_INCLUDE_DIR}")
 message("-- CURL_LIBRARIES: ${CURL_LIBRARIES}")
 
+# Adding glib library
+pkg_check_modules(GLIB REQUIRED glib-2.0>=2.23)
+#include_directories(${GLIB_INCLUDE_DIRS})
+#link_directories(${GLIB_LIBRARY_DIRS})
+
+
 # Include
 #include_directories( ${CUDA_INCLUDE_DIRS} )
 include_directories( ${GST_INCLUDE_DIRS} )
@@ -68,7 +74,7 @@ cuda_add_executable(home-security ${home-securitySources})
 #add_executable(home-security ${home-securitySources})
 
 # Link home-security to the jetson-inference library
-target_link_libraries(home-security jetson-inference jetson-utils curl)
+target_link_libraries(home-security jetson-inference jetson-utils curl ${GLIB_LIBRARIES})
 
 install(TARGETS home-security DESTINATION bin)
 
