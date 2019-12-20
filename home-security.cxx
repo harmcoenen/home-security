@@ -156,20 +156,24 @@ int main( int argc, char** argv )
         if( numDetections > 0 )
         {
             /* Print the details for the detected objects */
-            printf("\n%i objects detected", numDetections);
+            std::cout << numDetections << " objects detected" << std::endl;
 
             for( int n=0; n < numDetections; n++ )
             {
-                printf("\ndetected obj %i  class #%u (%s)  confidence=%f", n, detections[n].ClassID, net->GetClassDesc(detections[n].ClassID), detections[n].Confidence);
-                printf("\nbounding box %i  (%f, %f)  (%f, %f)  w=%f  h=%f", n, detections[n].Left, detections[n].Top, detections[n].Right, detections[n].Bottom, detections[n].Width(), detections[n].Height());
+                std::cout << "detected obj " << n << " class #" << detections[n].ClassID << " (" << net->GetClassDesc(detections[n].ClassID) << ") confidence=" << detections[n].Confidence << std::endl;
+                std::cout << "bounding box " << n << " (" << detections[n].Left << ", " << detections[n].Top << ") (" << detections[n].Right << ", " << detections[n].Bottom << ") w=" << detections[n].Width() << " h=" << detections[n].Height() << std::endl;
             }
 
-            printf( "\nImage width is %i, height is %i, size is %i", camera->GetWidth(), camera->GetHeight(), camera->GetSize() );
+            std::cout << "Size of a float is " <<  sizeof(float) << std::endl;
+            std::cout << "Image width x height is " << camera->GetWidth() << "x" << camera->GetHeight() << std::endl;
+            std::cout << "Size of cpu image is " << camera->GetSize() << std::endl;
+            std::cout << "Size of RGBA image is " << ( camera->GetWidth() * camera->GetHeight() * sizeof(float) * 4 ) << std::endl;
 
             if ( !g_file_set_contents( "/home/nano/Pictures/picture.yuv", (const char *) cpu, camera->GetSize(), &err ) ) {
-                printf("Could not save picture: %s", err->message);
+                std::cout << "Could not save picture: " << err->message << std::endl;
                 g_error_free( err );
             }
+
 
             /* Construct dynamically a new email message */
             emailMessage email(numDetections, detections);
