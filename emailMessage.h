@@ -6,6 +6,7 @@
 #include <vector>
 #include <string>
 #include <curl/curl.h>
+#include <jetson-utils/filesystem.h>
 #include <jetson-utils/commandLine.h>
 #include <jetson-inference/detectNet.h>
 
@@ -32,9 +33,10 @@ class emailMessage {
     std::vector<std::string> mHeader;
     std::vector<std::string> mInlineText;
     std::vector<std::string> mInlineHTML;
+    const char* attachment;
 
 public:
-    emailMessage( const int, detectNet::Detection* );
+    emailMessage( const int, detectNet::Detection*, const char* );
     ~emailMessage();
 
     int send( void );

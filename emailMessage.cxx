@@ -1,7 +1,7 @@
 #include "emailMessage.h"
 
 // constructor
-emailMessage::emailMessage( const int numDetections,detectNet::Detection* detections ) {
+emailMessage::emailMessage( const int numDetections, detectNet::Detection* detections, const char* outputFilename ) {
 
     /* Fill the Header with dynamic data */
     mHeader.push_back( "Date: Mon, 18 Dec 2019 12:34:56 +0100" );
@@ -19,6 +19,7 @@ emailMessage::emailMessage( const int numDetections,detectNet::Detection* detect
 
     //printf("\nEMAIL: %i objects detected", numDetections);
     //printf("\nEMAIL: detected obj class #%u, confidence=%f", detections[0].ClassID, detections[0].Confidence);
+    attachment = outputFilename;
 }
 
 // destructor
@@ -94,9 +95,11 @@ int emailMessage::send( void ) {
         curl_mime_headers(part, slist, 1);
 
         /* Add the current source program as an attachment. */
-        part = curl_mime_addpart(mime);
-        curl_mime_filedata(part, "/home/nano/github/home-security/README.md");
-        curl_easy_setopt(curl, CURLOPT_MIMEPOST, mime);
+        if( fileExists( attachment ) ) {
+            part = curl_mime_addpart(mime);
+            curl_mime_filedata(part, attachment);
+            curl_easy_setopt(curl, CURLOPT_MIMEPOST, mime);
+        }
 
         /* Send the message */
         res = curl_easy_perform(curl);
