@@ -177,7 +177,7 @@ int main( int argc, char** argv )
             }
 
             // save image to disk
-            const char* outputFilename = "/home/nano/Pictures/picture.png";
+            const char* outputFilename = "/home/nano/Pictures/picture.jpeg";
             if( !saveImageRGBA( outputFilename, (float4*)imgRGBA, camera->GetWidth(), camera->GetHeight(), 255.0f, 100 ) )
                 cout << "home-security: failed saving " << camera->GetWidth() << "x" << camera->GetHeight() << " image to '" << outputFilename << "'" << endl;
             else    
