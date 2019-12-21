@@ -19,6 +19,8 @@ using namespace std;
 #define CC       "<info@familiecoenen.nl>"
 #define DOT      "@@_DETECTION_OVERVIEW_TEXT_@@"
 #define DOH      "@@_DETECTION_OVERVIEW_HTML_@@"
+#define MARKER   "<x>"
+#define SUBJECT  "Subject: home-security has " MARKER " object(s) detected"
 #define MAX_TIME_STRING 80
 
 
@@ -37,6 +39,7 @@ class emailMessage {
 
     /* Member Variables */
     vector<string> mHeader;
+    string mSubject;
     string mBaseInlineText;
     string mBaseInlineHTML;
     const char* mAttachment;

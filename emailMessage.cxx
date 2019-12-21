@@ -5,6 +5,8 @@ emailMessage::emailMessage( const int numDetections, detectNet::Detection* detec
 
     string dot( DOT );
     string doh( DOH );
+    string marker( MARKER );
+    mSubject = SUBJECT;
     mBaseInlineText = INLINE_TEXT ;
     mBaseInlineHTML = INLINE_HTML ;
 
@@ -18,9 +20,8 @@ emailMessage::emailMessage( const int numDetections, detectNet::Detection* detec
     mHeader.push_back( "From: " FROM " Jetson-Nano" );
     mHeader.push_back( "Cc: " CC " Info-Box" );
     //mHeader.push_back( "Message-ID: <dcd7cb36-11db-487a-9f3a-e652a9458efd@rfcpedant.example.org>" );
-    string subject( "Subject: home-security has <x> object(s) detected" );
-    subject.replace( subject.find( "<x>" ), 3, to_string( numDetections ) );
-    mHeader.push_back( subject );
+    mSubject.replace( mSubject.find( marker ), marker.length(), to_string( numDetections ) );
+    mHeader.push_back( mSubject );
 
     /* Fill the Inline Text with dynamic data */
     mBaseInlineText.replace( mBaseInlineText.find( dot ), dot.length(), "REPLACED TEXT OVERVIEW");
