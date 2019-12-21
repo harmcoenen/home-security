@@ -103,8 +103,8 @@ int emailMessage::send( void ) {
             //curl_mime_encoder(part, "binary");
             curl_mime_encoder(part, "base64");
             //curl_mime_name(part, "image");
-            alist = curl_slist_append(NULL, "Content-Disposition: attachment");
-            alist = curl_slist_append(alist, "Content-Transfer-Encoding: base64");
+            //alist = curl_slist_append(NULL, "Content-Disposition: attachment");
+            alist = curl_slist_append(NULL, "Content-Transfer-Encoding: base64");
             curl_mime_headers(part, alist, 1);
         }
 
