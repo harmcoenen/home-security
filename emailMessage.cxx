@@ -37,6 +37,7 @@ int emailMessage::send( void ) {
         struct curl_slist *headers = NULL;
         struct curl_slist *recipients = NULL;
         struct curl_slist *slist = NULL;
+        struct curl_slist *alist = NULL;
         curl_mime *mime;
         curl_mime *alt;
         curl_mimepart *part;
@@ -98,8 +99,16 @@ int emailMessage::send( void ) {
         if( fileExists( attachment ) ) {
             part = curl_mime_addpart(mime);
             curl_mime_filedata(part, attachment);
-            curl_easy_setopt(curl, CURLOPT_MIMEPOST, mime);
+            curl_mime_type(part, "image/jpeg");
+            //curl_mime_encoder(part, "binary");
+            curl_mime_encoder(part, "base64");
+            //curl_mime_name(part, "image");
+            alist = curl_slist_append(NULL, "Content-Disposition: attachment");
+            alist = curl_slist_append(alist, "Content-Transfer-Encoding: base64");
+            curl_mime_headers(part, alist, 1);
         }
+
+        curl_easy_setopt(curl, CURLOPT_MIMEPOST, mime);
 
         /* Send the message */
         res = curl_easy_perform(curl);
