@@ -12,7 +12,7 @@
 
 using namespace std;
 
-const char* outputFilename = "/home/nano/Pictures/picture.jpeg";
+const char* detectedFilename = "/home/nano/Pictures/detected.jpeg";
 
 bool signal_recieved = false;
 

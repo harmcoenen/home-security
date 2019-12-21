@@ -153,13 +153,13 @@ int main( int argc, char** argv )
             /*
              * save image to jpeg file
              */
-            if( !saveImageRGBA( outputFilename, (float4*)imgRGBA, camera->GetWidth(), camera->GetHeight(), 255.0f, 100 ) )
-                cout << "home-security: failed saving " << camera->GetWidth() << "x" << camera->GetHeight() << " image to '" << outputFilename << "'" << endl;
+            if( !saveImageRGBA( detectedFilename, (float4*)imgRGBA, camera->GetWidth(), camera->GetHeight(), 255.0f, 100 ) )
+                cout << "home-security: failed saving " << camera->GetWidth() << "x" << camera->GetHeight() << " image to '" << detectedFilename << "'" << endl;
 
             /*
              * Construct dynamically a new email message
              */
-            emailMessage email(numDetections, detections, outputFilename);
+            emailMessage email(numDetections, detections, detectedFilename);
 
             /*
              * print the constructed header and inline data

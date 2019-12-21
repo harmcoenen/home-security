@@ -1,29 +1,38 @@
 #include "emailMessage.h"
 
 // constructor
-emailMessage::emailMessage( const int numDetections, detectNet::Detection* detections, const char* outputFilename ) {
+emailMessage::emailMessage( const int numDetections, detectNet::Detection* detections, const char* detectedFilename ) {
+
+    string dot( DOT );
+    string doh( DOH );
+    string baseInlineText( INLINE_TEXT );
+    string baseInlineHTML( INLINE_HTML );
 
     /* Fill the Header with dynamic data */
     if ( timeFormatted() > 30 ) {
-        mHeader.push_back( timeString );
+        mHeader.push_back( mTimeString );
     } else {
         mHeader.push_back( "Date: Wed, 01 Jan 2020 12:34:56 +0100" );
     }
     mHeader.push_back( "To: " TO );
     mHeader.push_back( "From: " FROM " Jetson-Nano" );
     mHeader.push_back( "Cc: " CC " Info-Box" );
-    mHeader.push_back( "Message-ID: <dcd7cb36-11db-487a-9f3a-e652a9458efd@rfcpedant.example.org>" );
-    mHeader.push_back( "Subject: example sending a MIME-formatted message via Class" );
+    //mHeader.push_back( "Message-ID: <dcd7cb36-11db-487a-9f3a-e652a9458efd@rfcpedant.example.org>" );
+    string subject( "Subject: home-security has <x> object(s) detected" );
+    subject.replace( subject.find( "<x>" ), 3, to_string( numDetections ) );
+    mHeader.push_back( subject );
 
     /* Fill the Inline Text with dynamic data */
-    mInlineText.push_back( INLINE_TEXT );
+    baseInlineText.replace( baseInlineText.find( dot ), dot.length(), "REPLACED TEXT OVERVIEW");
+    mInlineText.push_back( baseInlineText );
 
     /* Fill the Inline HTML with dynamic data */
-    mInlineHTML.push_back( INLINE_HTML );
+    baseInlineHTML.replace( baseInlineHTML.find( doh ), doh.length(), "REPLACED HTML OVERVIEW");
+    mInlineHTML.push_back( baseInlineHTML );
 
     //printf("\nEMAIL: %i objects detected", numDetections);
     //printf("\nEMAIL: detected obj class #%u, confidence=%f", detections[0].ClassID, detections[0].Confidence);
-    attachment = outputFilename;
+    mAttachment = detectedFilename;
 }
 
 // destructor
@@ -96,9 +105,9 @@ int emailMessage::send( void ) {
         curl_mime_headers(part, slist, 1);
 
         /* Add the current source program as an attachment. */
-        if( fileExists( attachment ) ) {
+        if( fileExists( mAttachment ) ) {
             part = curl_mime_addpart(mime);
-            curl_mime_filedata(part, attachment);
+            curl_mime_filedata(part, mAttachment);
             curl_mime_type(part, "image/jpeg");
             //curl_mime_encoder(part, "binary");
             curl_mime_encoder(part, "base64");
@@ -169,5 +178,5 @@ size_t emailMessage::timeFormatted( void ) {
   time( &rawtime );
   timeinfo = localtime( &rawtime );
 
-  return( strftime( timeString, MAX_TIME_STRING, "Date: %a, %d %b %G %H:%M:%S %z", timeinfo ) );
+  return( strftime( mTimeString, MAX_TIME_STRING, "Date: %a, %d %b %G %H:%M:%S %z", timeinfo ) );
 }
