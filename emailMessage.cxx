@@ -4,10 +4,14 @@
 emailMessage::emailMessage( const int numDetections, detectNet::Detection* detections, const char* outputFilename ) {
 
     /* Fill the Header with dynamic data */
-    mHeader.push_back( "Date: Mon, 18 Dec 2019 12:34:56 +0100" );
+    if ( timeFormatted() > 10 ) {
+        mHeader.push_back( timeString );
+    } else {
+        mHeader.push_back( "Date: Mon, 18 Dec 2019 12:34:56 +0100" );
+    }
     mHeader.push_back( "To: " TO );
-    mHeader.push_back( "From: " FROM " (Jetson Nano)" );
-    mHeader.push_back( "Cc: " CC " (Info Box)" );
+    mHeader.push_back( "From: " FROM " Jetson-Nano" );
+    mHeader.push_back( "Cc: " CC " Info-Box" );
     mHeader.push_back( "Message-ID: <dcd7cb36-11db-487a-9f3a-e652a9458efd@rfcpedant.example.org>" );
     mHeader.push_back( "Subject: example sending a MIME-formatted message via Class" );
 
@@ -65,10 +69,6 @@ int emailMessage::send( void ) {
         if( !mHeader.empty() ) {
             for( int i = 0; i < mHeader.size(); i++ )
                 headers = curl_slist_append(headers, mHeader[i].c_str());
-            /*
-            for (std::vector<std::string>::iterator it = headers.begin(); it != headers.end(); ++it)
-                m_headers = curl_slist_append(m_headers,it->c_str());
-            */
             curl_easy_setopt(curl, CURLOPT_HTTPHEADER, headers);
         }
 
@@ -154,10 +154,20 @@ void emailMessage::printInlineHTML( void ) {
 }
 
 // Internal print function
-void emailMessage::print( std::vector<std::string> vs ) {
+void emailMessage::print( vector<string> vs ) {
 
     // Print Strings stored in Vector
-    std::cout << std::endl;
+    cout << endl;
     for( int i = 0; i < vs.size(); i++ )
-        std::cout << vs[i] << std::endl;
+        cout << vs[i] << endl;
+}
+
+size_t emailMessage::timeFormatted( void ) {
+  time_t rawtime;
+  struct tm * timeinfo;
+
+  time( &rawtime );
+  timeinfo = localtime( &rawtime );
+
+  return( strftime( timeString, MAX_TIME_STRING, "Date: %a, %d %b %G %H:%M:%S %z", timeinfo ) );
 }

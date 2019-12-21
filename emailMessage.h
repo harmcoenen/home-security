@@ -1,6 +1,7 @@
 #ifndef __EMAIL_MESSAGE_H__
 #define __EMAIL_MESSAGE_H__
 
+#include <time.h>
 #include <stdio.h>
 #include <iostream>
 #include <vector>
@@ -10,11 +11,13 @@
 #include <jetson-utils/commandLine.h>
 #include <jetson-inference/detectNet.h>
 
+using namespace std;
 
 #define SMTP_URL "smtp://smtp.ziggo.nl"
 #define FROM    "<jetson@familiecoenen.nl>"
 #define TO      "<harm@familiecoenen.nl>"
 #define CC      "<info@familiecoenen.nl>"
+#define MAX_TIME_STRING 80
 
 #define INLINE_TEXT "This is the inline text message of the e-mail.\r\n" \
                     "It could be a lot of lines that would be displayed " \
@@ -30,10 +33,11 @@
 class emailMessage {
 
     /* Member Variables */
-    std::vector<std::string> mHeader;
-    std::vector<std::string> mInlineText;
-    std::vector<std::string> mInlineHTML;
+    vector<string> mHeader;
+    vector<string> mInlineText;
+    vector<string> mInlineHTML;
     const char* attachment;
+    char timeString [MAX_TIME_STRING];
 
 public:
     emailMessage( const int, detectNet::Detection*, const char* );
@@ -46,8 +50,8 @@ public:
     void printInlineHTML( void );
 
 private:
-    void print( std::vector<std::string> );
-
+    void print( vector<string> );
+    size_t timeFormatted( void );
 };
 
 #endif /* __EMAIL_MESSAGE_H__ */
