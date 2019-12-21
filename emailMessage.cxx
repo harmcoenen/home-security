@@ -1,10 +1,10 @@
 #include "emailMessage.h"
 
 // constructor
-emailMessage::emailMessage( const int numDetections, detectNet::Detection* detections, const char* detectedFilename ) {
+emailMessage::emailMessage( const int numDetections, detectNet::Detection* detections, detectNet* net, const char* detectedFilename ) {
 
-    string dot( DOT );
-    string doh( DOH );
+    string dynamicText;
+    string dynamicHTML;
     string marker( MARKER );
     mSubject = SUBJECT;
     mBaseInlineText = INLINE_TEXT ;
@@ -24,10 +24,41 @@ emailMessage::emailMessage( const int numDetections, detectNet::Detection* detec
     mHeader.push_back( mSubject );
 
     /* Fill the Inline Text with dynamic data */
-    mBaseInlineText.replace( mBaseInlineText.find( dot ), dot.length(), "REPLACED TEXT OVERVIEW");
+    dynamicText.append( "REPLACED TEXT OVERVIEW" );
+    mBaseInlineText.replace( mBaseInlineText.find( marker ), marker.length(), dynamicText);
 
     /* Fill the Inline HTML with dynamic data */
-    mBaseInlineHTML.replace( mBaseInlineHTML.find( doh ), doh.length(), "REPLACED HTML OVERVIEW");
+    for( int n=0; n < numDetections; n++ )
+    {
+        dynamicHTML.append( "home-security: detected obj " );
+        dynamicHTML.append( to_string( n ) );
+        dynamicHTML.append( " class #" );
+        dynamicHTML.append( to_string( detections[n].ClassID ) );
+        dynamicHTML.append( " (" );
+        dynamicHTML.append( net->GetClassDesc( detections[n].ClassID ) );
+        dynamicHTML.append( ") confidence=" );
+        dynamicHTML.append( to_string( detections[n].Confidence ) );
+        dynamicHTML.append( "<br>");
+
+        dynamicHTML.append( "bounding box " );
+        dynamicHTML.append( to_string( n ) );
+        dynamicHTML.append( " (" );
+        dynamicHTML.append( to_string( detections[n].Left ) );
+        dynamicHTML.append( ", " );
+        dynamicHTML.append( to_string( detections[n].Top ) );
+        dynamicHTML.append( ") (" );
+        dynamicHTML.append( to_string( detections[n].Right ) );
+        dynamicHTML.append( ", " );
+        dynamicHTML.append( to_string( detections[n].Bottom ) );
+        dynamicHTML.append( "), width=" );
+        dynamicHTML.append( to_string( detections[n].Width() ) );
+        dynamicHTML.append( ", height=" );
+        dynamicHTML.append( to_string( detections[n].Height() ) );
+        dynamicHTML.append( ", area=" );
+        dynamicHTML.append( to_string( detections[n].Area() ) );
+        dynamicHTML.append( "<br>");
+    }
+    mBaseInlineHTML.replace( mBaseInlineHTML.find( marker ), marker.length(), dynamicHTML);
 
     mAttachment = detectedFilename;
 }

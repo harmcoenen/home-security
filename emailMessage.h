@@ -17,22 +17,20 @@ using namespace std;
 #define FROM     "<jetson@familiecoenen.nl>"
 #define TO       "<harm@familiecoenen.nl>"
 #define CC       "<info@familiecoenen.nl>"
-#define DOT      "@@_DETECTION_OVERVIEW_TEXT_@@"
-#define DOH      "@@_DETECTION_OVERVIEW_HTML_@@"
-#define MARKER   "<x>"
+#define MARKER   "@@_<x>_@@"
 #define SUBJECT  "Subject: home-security has " MARKER " object(s) detected"
 #define MAX_TIME_STRING 80
 
 
 #define INLINE_TEXT "home-security has detected one or more objects.\r\n" \
                     "Here is an overview of the detection(s):\r\n" \
-                    DOT "\r\n"
+                    MARKER "\r\n"
 
 #define INLINE_HTML "<html><body>\r\n" \
                     "<p><b><u>home-security has detected one or more objects.</u></b></p>\r\n" \
                     "<br><br>\r\n" \
                     "<p>Here is an overview of the detection(s):</p>\r\n" \
-                    "<p>" DOH "</p>\r\n" \
+                    "<p>" MARKER "</p>\r\n" \
                     "</body></html>\r\n"
 
 class emailMessage {
@@ -46,7 +44,7 @@ class emailMessage {
     char mTimeString [MAX_TIME_STRING];
 
 public:
-    emailMessage( const int, detectNet::Detection*, const char* );
+    emailMessage( const int, detectNet::Detection*, detectNet*, const char* );
     ~emailMessage();
 
     int send( void );
