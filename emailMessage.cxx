@@ -4,10 +4,10 @@
 emailMessage::emailMessage( const int numDetections, detectNet::Detection* detections, const char* outputFilename ) {
 
     /* Fill the Header with dynamic data */
-    if ( timeFormatted() > 10 ) {
+    if ( timeFormatted() > 30 ) {
         mHeader.push_back( timeString );
     } else {
-        mHeader.push_back( "Date: Mon, 18 Dec 2019 12:34:56 +0100" );
+        mHeader.push_back( "Date: Wed, 01 Jan 2020 12:34:56 +0100" );
     }
     mHeader.push_back( "To: " TO );
     mHeader.push_back( "From: " FROM " Jetson-Nano" );
