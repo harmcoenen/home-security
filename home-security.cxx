@@ -159,7 +159,7 @@ int main( int argc, char** argv )
             /*
              * Construct dynamically a new email message
              */
-            emailMessage email(numDetections, detections, net, detectedFilename);
+            emailMessage email( numDetections, detections, net, detectedFilename );
 
             /*
              * print the constructed header and inline data

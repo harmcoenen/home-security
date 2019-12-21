@@ -3,8 +3,6 @@
 // constructor
 emailMessage::emailMessage( const int numDetections, detectNet::Detection* detections, detectNet* net, const char* detectedFilename ) {
 
-    string dynamicText;
-    string dynamicHTML;
     string marker( MARKER );
     mSubject = SUBJECT;
     mBaseInlineText = INLINE_TEXT ;
@@ -24,41 +22,10 @@ emailMessage::emailMessage( const int numDetections, detectNet::Detection* detec
     mHeader.push_back( mSubject );
 
     /* Fill the Inline Text with dynamic data */
-    dynamicText.append( "REPLACED TEXT OVERVIEW" );
-    mBaseInlineText.replace( mBaseInlineText.find( marker ), marker.length(), dynamicText);
+    mBaseInlineText.replace( mBaseInlineText.find( marker ), marker.length(), dynamicText( numDetections, detections, net ) );
 
     /* Fill the Inline HTML with dynamic data */
-    for( int n=0; n < numDetections; n++ )
-    {
-        dynamicHTML.append( "home-security: detected obj " );
-        dynamicHTML.append( to_string( n ) );
-        dynamicHTML.append( " class #" );
-        dynamicHTML.append( to_string( detections[n].ClassID ) );
-        dynamicHTML.append( " (" );
-        dynamicHTML.append( net->GetClassDesc( detections[n].ClassID ) );
-        dynamicHTML.append( ") confidence=" );
-        dynamicHTML.append( to_string( detections[n].Confidence ) );
-        dynamicHTML.append( "<br>");
-
-        dynamicHTML.append( "bounding box " );
-        dynamicHTML.append( to_string( n ) );
-        dynamicHTML.append( " (" );
-        dynamicHTML.append( to_string( detections[n].Left ) );
-        dynamicHTML.append( ", " );
-        dynamicHTML.append( to_string( detections[n].Top ) );
-        dynamicHTML.append( ") (" );
-        dynamicHTML.append( to_string( detections[n].Right ) );
-        dynamicHTML.append( ", " );
-        dynamicHTML.append( to_string( detections[n].Bottom ) );
-        dynamicHTML.append( "), width=" );
-        dynamicHTML.append( to_string( detections[n].Width() ) );
-        dynamicHTML.append( ", height=" );
-        dynamicHTML.append( to_string( detections[n].Height() ) );
-        dynamicHTML.append( ", area=" );
-        dynamicHTML.append( to_string( detections[n].Area() ) );
-        dynamicHTML.append( "<br>");
-    }
-    mBaseInlineHTML.replace( mBaseInlineHTML.find( marker ), marker.length(), dynamicHTML);
+    mBaseInlineHTML.replace( mBaseInlineHTML.find( marker ), marker.length(), dynamicHTML( numDetections, detections, net ) );
 
     mAttachment = detectedFilename;
 }
@@ -193,4 +160,66 @@ size_t emailMessage::timeFormatted( void ) {
   timeinfo = localtime( &rawtime );
 
   return( strftime( mTimeString, MAX_TIME_STRING, "Date: %a, %d %b %G %H:%M:%S %z", timeinfo ) );
+}
+
+string emailMessage::dynamicText( const int numDetections, detectNet::Detection* detections, detectNet* net ) {
+    string tempText;
+
+    for( int n=0; n < numDetections; n++ )
+    {
+        tempText.append( "home-security: detected obj " );
+        tempText.append( to_string( n ) );
+        tempText.append( " class #" );
+        tempText.append( to_string( detections[n].ClassID ) );
+        tempText.append( " (" );
+        tempText.append( net->GetClassDesc( detections[n].ClassID ) );
+        tempText.append( ") confidence=" );
+        tempText.append( to_string( detections[n].Confidence ) );
+        tempText.append( "\r\n");
+
+        tempText.append( "bounding box " );
+        tempText.append( to_string( n ) );
+        tempText.append( " (" );
+        tempText.append( to_string( detections[n].Left ) );
+        tempText.append( ", " );
+        tempText.append( to_string( detections[n].Top ) );
+        tempText.append( ") (" );
+        tempText.append( to_string( detections[n].Right ) );
+        tempText.append( ", " );
+        tempText.append( to_string( detections[n].Bottom ) );
+        tempText.append( "), width=" );
+        tempText.append( to_string( detections[n].Width() ) );
+        tempText.append( ", height=" );
+        tempText.append( to_string( detections[n].Height() ) );
+        tempText.append( ", area=" );
+        tempText.append( to_string( detections[n].Area() ) );
+        tempText.append( "\r\n");
+    }
+
+    return( tempText );
+}
+
+string emailMessage::dynamicHTML( const int numDetections, detectNet::Detection* detections, detectNet* net ) {
+    string tempHTML( "<table> <tr> <th>Obj #</th> <th>Class ID</th> <th>Class Description</th> <th>Confidence</th> <th>Left</th> <th>Top</th> <th>Right</th> <th>Bottom</th> <th>Width</th> <th>Height</th> <th>Area</th> </tr>" );
+
+    for( int n=0; n < numDetections; n++ )
+    {
+        tempHTML.append( "<tr>" );
+        tempHTML.append( "<td>" ); tempHTML.append( to_string( n ) );                             tempHTML.append( "</td>" );
+        tempHTML.append( "<td>" ); tempHTML.append( to_string( detections[n].ClassID ) );         tempHTML.append( "</td>" );
+        tempHTML.append( "<td>" ); tempHTML.append( net->GetClassDesc( detections[n].ClassID ) ); tempHTML.append( "</td>" );
+        tempHTML.append( "<td>" ); tempHTML.append( to_string( detections[n].Confidence ) );      tempHTML.append( "</td>" );
+        tempHTML.append( "<td>" ); tempHTML.append( to_string( detections[n].Left ) );            tempHTML.append( "</td>" );
+        tempHTML.append( "<td>" ); tempHTML.append( to_string( detections[n].Top ) );             tempHTML.append( "</td>" );
+        tempHTML.append( "<td>" ); tempHTML.append( to_string( detections[n].Right ) );           tempHTML.append( "</td>" );
+        tempHTML.append( "<td>" ); tempHTML.append( to_string( detections[n].Bottom ) );          tempHTML.append( "</td>" );
+        tempHTML.append( "<td>" ); tempHTML.append( to_string( detections[n].Width() ) );         tempHTML.append( "</td>" );
+        tempHTML.append( "<td>" ); tempHTML.append( to_string( detections[n].Height() ) );        tempHTML.append( "</td>" );
+        tempHTML.append( "<td>" ); tempHTML.append( to_string( detections[n].Area() ) );          tempHTML.append( "</td>" );
+        tempHTML.append( "</tr>" );
+    }
+
+    tempHTML.append( "</table>" );
+
+    return( tempHTML );
 }

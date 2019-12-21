@@ -26,12 +26,31 @@ using namespace std;
                     "Here is an overview of the detection(s):\r\n" \
                     MARKER "\r\n"
 
-#define INLINE_HTML "<html><body>\r\n" \
-                    "<p><b><u>home-security has detected one or more objects.</u></b></p>\r\n" \
+#define INLINE_HTML "<html>\r\n" \
+                    "<head>\r\n" \
+                    "<style>\r\n" \
+                    "table {\r\n" \
+                    "  font-family: arial, sans-serif;\r\n" \
+                    "  border-collapse: collapse;\r\n" \
+                    "  width: 100%;\r\n" \
+                    "}\r\n" \
+                    "td, th {\r\n" \
+                    "  border: 1px solid #dddddd;\r\n" \
+                    "  text-align: left;\r\n" \
+                    "  padding: 8px;\r\n" \
+                    "}\r\n" \
+                    "tr:nth-child(even) {\r\n" \
+                    "  background-color: #dddddd;\r\n" \
+                    "}\r\n" \
+                    "</style>\r\n" \
+                    "</head>\r\n" \
+                    "<body>\r\n" \
+                    "<h2>home-security has detected one or more objects.</h2>\r\n" \
                     "<br><br>\r\n" \
-                    "<p>Here is an overview of the detection(s):</p>\r\n" \
-                    "<p>" MARKER "</p>\r\n" \
-                    "</body></html>\r\n"
+                    "<h3>Here is an overview of the detection(s):</h3>\r\n" \
+                    MARKER "\r\n" \
+                    "</body>\r\n" \
+                    "</html>\r\n"
 
 class emailMessage {
 
@@ -55,6 +74,8 @@ public:
 
 private:
     size_t timeFormatted( void );
+    string dynamicText( const int, detectNet::Detection*, detectNet* );
+    string dynamicHTML( const int, detectNet::Detection*, detectNet* );
 };
 
 #endif /* __EMAIL_MESSAGE_H__ */
