@@ -37,8 +37,8 @@ class emailMessage {
 
     /* Member Variables */
     vector<string> mHeader;
-    vector<string> mInlineText;
-    vector<string> mInlineHTML;
+    string mBaseInlineText;
+    string mBaseInlineHTML;
     const char* mAttachment;
     char mTimeString [MAX_TIME_STRING];
 
@@ -53,7 +53,6 @@ public:
     void printInlineHTML( void );
 
 private:
-    void print( vector<string> );
     size_t timeFormatted( void );
 };
 

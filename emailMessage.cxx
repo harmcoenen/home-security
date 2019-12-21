@@ -5,8 +5,8 @@ emailMessage::emailMessage( const int numDetections, detectNet::Detection* detec
 
     string dot( DOT );
     string doh( DOH );
-    string baseInlineText( INLINE_TEXT );
-    string baseInlineHTML( INLINE_HTML );
+    mBaseInlineText = INLINE_TEXT ;
+    mBaseInlineHTML = INLINE_HTML ;
 
     /* Fill the Header with dynamic data */
     if ( timeFormatted() > 30 ) {
@@ -23,15 +23,11 @@ emailMessage::emailMessage( const int numDetections, detectNet::Detection* detec
     mHeader.push_back( subject );
 
     /* Fill the Inline Text with dynamic data */
-    baseInlineText.replace( baseInlineText.find( dot ), dot.length(), "REPLACED TEXT OVERVIEW");
-    mInlineText.push_back( baseInlineText );
+    mBaseInlineText.replace( mBaseInlineText.find( dot ), dot.length(), "REPLACED TEXT OVERVIEW");
 
     /* Fill the Inline HTML with dynamic data */
-    baseInlineHTML.replace( baseInlineHTML.find( doh ), doh.length(), "REPLACED HTML OVERVIEW");
-    mInlineHTML.push_back( baseInlineHTML );
+    mBaseInlineHTML.replace( mBaseInlineHTML.find( doh ), doh.length(), "REPLACED HTML OVERVIEW");
 
-    //printf("\nEMAIL: %i objects detected", numDetections);
-    //printf("\nEMAIL: detected obj class #%u, confidence=%f", detections[0].ClassID, detections[0].Confidence);
     mAttachment = detectedFilename;
 }
 
@@ -90,12 +86,12 @@ int emailMessage::send( void ) {
 
         /* HTML message. */
         part = curl_mime_addpart(alt);
-        curl_mime_data(part, INLINE_HTML, CURL_ZERO_TERMINATED);
+        curl_mime_data(part, mBaseInlineHTML.c_str(), CURL_ZERO_TERMINATED);
         curl_mime_type(part, "text/html");
 
         /* Text message. */
         part = curl_mime_addpart(alt);
-        curl_mime_data(part, INLINE_TEXT, CURL_ZERO_TERMINATED);
+        curl_mime_data(part, mBaseInlineText.c_str(), CURL_ZERO_TERMINATED);
 
         /* Create the inline part. */
         part = curl_mime_addpart(mime);
@@ -109,10 +105,7 @@ int emailMessage::send( void ) {
             part = curl_mime_addpart(mime);
             curl_mime_filedata(part, mAttachment);
             curl_mime_type(part, "image/jpeg");
-            //curl_mime_encoder(part, "binary");
             curl_mime_encoder(part, "base64");
-            //curl_mime_name(part, "image");
-            //alist = curl_slist_append(NULL, "Content-Disposition: attachment");
             alist = curl_slist_append(NULL, "Content-Transfer-Encoding: base64");
             curl_mime_headers(part, alist, 1);
         }
@@ -147,28 +140,17 @@ int emailMessage::send( void ) {
     return (int)res;
 }
 
-// Print header
 void emailMessage::printHeader( void ) {
-    print( mHeader );
+    for( int i = 0; i < mHeader.size(); i++ )
+        cout << mHeader[i] << endl;
 }
 
-// Print header
 void emailMessage::printInlineText( void ) {
-    print( mInlineText );
+    cout << mBaseInlineText << endl;
 }
 
-// Print header
 void emailMessage::printInlineHTML( void ) {
-    print( mInlineHTML );
-}
-
-// Internal print function
-void emailMessage::print( vector<string> vs ) {
-
-    // Print Strings stored in Vector
-    cout << endl;
-    for( int i = 0; i < vs.size(); i++ )
-        cout << vs[i] << endl;
+    cout << mBaseInlineHTML << endl;
 }
 
 size_t emailMessage::timeFormatted( void ) {
