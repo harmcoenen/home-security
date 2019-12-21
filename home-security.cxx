@@ -140,38 +140,38 @@ int main( int argc, char** argv )
         if( numDetections > 0 )
         {
             /*
-             * Print the details for the detected objects
+             * Print the number of detected objects
              */
             cout << "home-security: " << numDetections << " objects detected" << endl;
 
+            int personFound = 0;
             for( int n=0; n < numDetections; n++ )
-            {
-                cout << "home-security: detected obj " << n << " class #" << detections[n].ClassID << " (" << net->GetClassDesc(detections[n].ClassID) << ") confidence=" << detections[n].Confidence << endl;
-                cout << "home-security: bounding box " << n << " (" << detections[n].Left << ", " << detections[n].Top << ") (" << detections[n].Right << ", " << detections[n].Bottom << ") w=" << detections[n].Width() << " h=" << detections[n].Height() << endl;
+                if( strcmp( net->GetClassDesc( detections[n].ClassID ), "person" ) == 0 )
+                    personFound++;
+
+            /*
+             * Save image to file and send it in an email, but only if a 'person' is detected
+             */
+            if( personFound ) {
+                /*
+                 * save image to jpeg file
+                 */
+                if( saveImageRGBA( detectedFilename, (float4*)imgRGBA, camera->GetWidth(), camera->GetHeight(), 255.0f, 100 ) ) {
+                    cout << "home-security: saved (" << camera->GetWidth() << "x" << camera->GetHeight() << ") image to '" << detectedFilename << "'" << endl;
+                } else {
+                    cout << "home-security: failed saving (" << camera->GetWidth() << "x" << camera->GetHeight() << ") image to '" << detectedFilename << "'" << endl;
+                }
+
+                /*
+                 * Construct dynamically a new email message and send it
+                 */
+                emailMessage email( numDetections, detections, net, detectedFilename );
+                if( email.send() == CURLE_OK ) {
+                    cout << "home-security: email sent." << endl;
+                } else {
+                    cout << "home-security: email send failed." << endl;
+                }
             }
-
-            /*
-             * save image to jpeg file
-             */
-            if( !saveImageRGBA( detectedFilename, (float4*)imgRGBA, camera->GetWidth(), camera->GetHeight(), 255.0f, 100 ) )
-                cout << "home-security: failed saving " << camera->GetWidth() << "x" << camera->GetHeight() << " image to '" << detectedFilename << "'" << endl;
-
-            /*
-             * Construct dynamically a new email message
-             */
-            emailMessage email( numDetections, detections, net, detectedFilename );
-
-            /*
-             * print the constructed header and inline data
-             */
-            email.printHeader();
-            email.printInlineText();
-            email.printInlineHTML();
-
-            /*
-             * send the email
-             */
-            email.send();  // To Do: Check if return value is CURLE_OK
         }
     }
 

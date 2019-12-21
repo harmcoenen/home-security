@@ -2,6 +2,7 @@
 #define __EMAIL_MESSAGE_H__
 
 #include <time.h>
+#include <math.h>
 #include <stdio.h>
 #include <iostream>
 #include <vector>

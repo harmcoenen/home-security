@@ -205,17 +205,17 @@ string emailMessage::dynamicHTML( const int numDetections, detectNet::Detection*
     for( int n=0; n < numDetections; n++ )
     {
         tempHTML.append( "<tr>" );
-        tempHTML.append( "<td>" ); tempHTML.append( to_string( n ) );                             tempHTML.append( "</td>" );
-        tempHTML.append( "<td>" ); tempHTML.append( to_string( detections[n].ClassID ) );         tempHTML.append( "</td>" );
-        tempHTML.append( "<td>" ); tempHTML.append( net->GetClassDesc( detections[n].ClassID ) ); tempHTML.append( "</td>" );
-        tempHTML.append( "<td>" ); tempHTML.append( to_string( detections[n].Confidence ) );      tempHTML.append( "</td>" );
-        tempHTML.append( "<td>" ); tempHTML.append( to_string( detections[n].Left ) );            tempHTML.append( "</td>" );
-        tempHTML.append( "<td>" ); tempHTML.append( to_string( detections[n].Top ) );             tempHTML.append( "</td>" );
-        tempHTML.append( "<td>" ); tempHTML.append( to_string( detections[n].Right ) );           tempHTML.append( "</td>" );
-        tempHTML.append( "<td>" ); tempHTML.append( to_string( detections[n].Bottom ) );          tempHTML.append( "</td>" );
-        tempHTML.append( "<td>" ); tempHTML.append( to_string( detections[n].Width() ) );         tempHTML.append( "</td>" );
-        tempHTML.append( "<td>" ); tempHTML.append( to_string( detections[n].Height() ) );        tempHTML.append( "</td>" );
-        tempHTML.append( "<td>" ); tempHTML.append( to_string( detections[n].Area() ) );          tempHTML.append( "</td>" );
+        tempHTML.append( "<td>" ); tempHTML.append( to_string( n ) );                                tempHTML.append( "</td>" );
+        tempHTML.append( "<td>" ); tempHTML.append( to_string( detections[n].ClassID ) );            tempHTML.append( "</td>" );
+        tempHTML.append( "<td>" ); tempHTML.append( net->GetClassDesc( detections[n].ClassID ) );    tempHTML.append( "</td>" );
+        tempHTML.append( "<td>" ); tempHTML.append( to_string( detections[n].Confidence ) );         tempHTML.append( "</td>" );
+        tempHTML.append( "<td>" ); tempHTML.append( to_string( lround( detections[n].Left ) ) );     tempHTML.append( "</td>" );
+        tempHTML.append( "<td>" ); tempHTML.append( to_string( lround( detections[n].Top ) ) );      tempHTML.append( "</td>" );
+        tempHTML.append( "<td>" ); tempHTML.append( to_string( lround( detections[n].Right ) ) );    tempHTML.append( "</td>" );
+        tempHTML.append( "<td>" ); tempHTML.append( to_string( lround( detections[n].Bottom ) ) );   tempHTML.append( "</td>" );
+        tempHTML.append( "<td>" ); tempHTML.append( to_string( lround( detections[n].Width() ) ) );  tempHTML.append( "</td>" );
+        tempHTML.append( "<td>" ); tempHTML.append( to_string( lround( detections[n].Height() ) ) ); tempHTML.append( "</td>" );
+        tempHTML.append( "<td>" ); tempHTML.append( to_string( lround( detections[n].Area() ) ) );   tempHTML.append( "</td>" );
         tempHTML.append( "</tr>" );
     }
 
