@@ -117,6 +117,8 @@ int main( int argc, char** argv )
 
     cout << "home-security: camera open for streaming" << endl;
 
+    hsDetection hs_detection;
+
     /*
      * processing loop
      */
@@ -140,8 +142,7 @@ int main( int argc, char** argv )
     
         const int numDetections = net->Detect(imgRGBA, camera->GetWidth(), camera->GetHeight(), &detections, overlayFlags);
         
-        if( numDetections > 0 )
-        {
+        if( numDetections > 0 ) {
             /*
              * Print the number of detected objects
              */
@@ -156,24 +157,64 @@ int main( int argc, char** argv )
              * Save image to file and send it in an email, but only if a 'person' is detected
              */
             if( personFound ) {
-                /*
-                 * save image to jpeg file
-                 */
-                if( saveImageRGBA( detectedFilename, (float4*)imgRGBA, camera->GetWidth(), camera->GetHeight(), 255.0f, 100 ) ) {
-                    cout << "home-security: saved (" << camera->GetWidth() << "x" << camera->GetHeight() << ") image to '" << detectedFilename << "'" << endl;
+
+                if( hs_detection.isActive() ) {
+
+                    if( hs_detection.getDuration() > 60 ) {
+                        cout << "home-security: hs_detection PERSON, " << hs_detection.getDuration() << " seconds active" << endl;
+                        hs_detection.setStarttime();
+                    } else {
+                        cout << "home-security: hs_detection PERSON, " << hs_detection.getDuration() << " seconds active" << endl;
+                    }
+
                 } else {
-                    cout << "home-security: failed saving (" << camera->GetWidth() << "x" << camera->GetHeight() << ") image to '" << detectedFilename << "'" << endl;
+
+                    hs_detection.setActive( true );
+                    hs_detection.setStarttime();
+
+                    /*
+                     * save image to jpeg file
+                     */
+                    if( saveImageRGBA( detectedFilename, (float4*)imgRGBA, camera->GetWidth(), camera->GetHeight(), 255.0f, 100 ) ) {
+                        cout << "home-security: saved (" << camera->GetWidth() << "x" << camera->GetHeight() << ") image to '" << detectedFilename << "'" << endl;
+                    } else {
+                        cout << "home-security: failed saving (" << camera->GetWidth() << "x" << camera->GetHeight() << ") image to '" << detectedFilename << "'" << endl;
+                    }
+
+                    /*
+                     * Construct dynamically a new email message and send it
+                     */
+                    emailMessage email( numDetections, detections, net, detectedFilename );
+                    if( email.send() == CURLE_OK ) {
+                        cout << "home-security: email sent." << endl;
+                    } else {
+                        cout << "home-security: email send failed." << endl;
+                    }
+                }
+            } else {
+
+                if( hs_detection.isActive() ) {
+
+                    if( hs_detection.getDuration() > 30 ) {
+                        cout << "home-security: hs_detection NOT A PERSON, " << hs_detection.getDuration() << " seconds active" << endl;
+                        hs_detection.setActive( false );
+                    } else {
+                        cout << "home-security: hs_detection NOT A PERSON, " << hs_detection.getDuration() << " seconds active" << endl;
+                    }
+
+                }
+            }
+        } else {
+
+            if( hs_detection.isActive() ) {
+
+                if( hs_detection.getDuration() > 30 ) {
+                    cout << "home-security: hs_detection NO DETECTION, " << hs_detection.getDuration() << " seconds active" << endl;
+                    hs_detection.setActive( false );
+                } else {
+                    cout << "home-security: hs_detection NO DETECTION, " << hs_detection.getDuration() << " seconds active" << endl;
                 }
 
-                /*
-                 * Construct dynamically a new email message and send it
-                 */
-                emailMessage email( numDetections, detections, net, detectedFilename );
-                if( email.send() == CURLE_OK ) {
-                    cout << "home-security: email sent." << endl;
-                } else {
-                    cout << "home-security: email send failed." << endl;
-                }
             }
         }
     }

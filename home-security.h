@@ -1,15 +1,16 @@
 #ifndef __HOME_SECURITY_H__
 #define __HOME_SECURITY_H__
 
+#include <chrono>
+#include <glib.h>
+#include <thread>
+#include <signal.h>
 #include <jetson-utils/imageIO.h>
 #include <jetson-utils/gstCamera.h>
 #include <jetson-utils/commandLine.h>
 #include <jetson-inference/detectNet.h>
-#include <signal.h>
-#include <glib.h>
-#include <thread>
-#include <chrono>
 
+#include "hsDetection.h"
 #include "emailMessage.h"
 
 using namespace std;
