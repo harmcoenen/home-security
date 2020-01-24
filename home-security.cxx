@@ -122,6 +122,9 @@ int main( int argc, char** argv )
      */
     while( !signal_recieved )
     {
+        /* Wait some time before each detection to keep the device cool */
+        std::this_thread::sleep_for( std::chrono::seconds( 1 ) );
+
         /*
          * capture RGBA image
          */

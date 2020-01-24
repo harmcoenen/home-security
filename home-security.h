@@ -7,6 +7,8 @@
 #include <jetson-inference/detectNet.h>
 #include <signal.h>
 #include <glib.h>
+#include <thread>
+#include <chrono>
 
 #include "emailMessage.h"
 
