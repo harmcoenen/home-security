@@ -2,13 +2,15 @@
 
 // constructor
 hsDetection::hsDetection() {
-    time( &mStarttime );
-    mActive = false;
+    time( &mSlicetime );
+    mActive = true;
+    mEmailAllowed = true;
 }
 
 // destructor
 hsDetection::~hsDetection() {
     mActive = false;
+    mEmailAllowed = false;
 }
 
 void hsDetection::setActive( bool active ) {
@@ -19,13 +21,21 @@ bool hsDetection::isActive( void ) {
     return( mActive );
 }
 
-void hsDetection::setStarttime( void ) {
-    time( &mStarttime );
+void hsDetection::setEmailAllowed( bool allowed ) {
+    mEmailAllowed = allowed;
+}
+
+bool hsDetection::isEmailAllowed( void ) {
+    return( mEmailAllowed );
+}
+
+void hsDetection::resetSlicetime( void ) {
+    time( &mSlicetime );
 }
 
 double hsDetection::getDuration( void ) {
     time_t now;
     time( &now );
 
-    return( difftime( now, mStarttime ) );
+    return( difftime( now, mSlicetime ) );
 }

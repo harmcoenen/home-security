@@ -127,6 +127,13 @@ int main( int argc, char** argv )
         /* Wait some time before each detection to keep the device cool */
         std::this_thread::sleep_for( std::chrono::seconds( 1 ) );
 
+        if( hs_detection.getDuration() > TIME_SLICE_DURATION ) {
+            hs_detection.resetSlicetime();
+            hs_detection.setEmailAllowed( true );
+        }
+
+        cout << "home-security: " << hs_detection.getDuration() << " seconds active" << endl;
+
         /*
          * capture RGBA image
          */
@@ -146,7 +153,7 @@ int main( int argc, char** argv )
             /*
              * Print the number of detected objects
              */
-            cout << "home-security: " << numDetections << " objects detected" << endl;
+            cout << "home-security: " << numDetections << " objects detected, " << endl;
 
             int personFound = 0;
             for( int n=0; n < numDetections; n++ )
@@ -158,63 +165,29 @@ int main( int argc, char** argv )
              */
             if( personFound ) {
 
-                if( hs_detection.isActive() ) {
-
-                    if( hs_detection.getDuration() > 60 ) {
-                        cout << "home-security: hs_detection PERSON, " << hs_detection.getDuration() << " seconds active" << endl;
-                        hs_detection.setStarttime();
-                    } else {
-                        cout << "home-security: hs_detection PERSON, " << hs_detection.getDuration() << " seconds active" << endl;
-                    }
-
+                /*
+                 * save image to jpeg file
+                 */
+                if( saveImageRGBA( detectedFilename, (float4*)imgRGBA, camera->GetWidth(), camera->GetHeight(), 255.0f, 100 ) ) {
+                    cout << "home-security: saved (" << camera->GetWidth() << "x" << camera->GetHeight() << ") image to '" << detectedFilename << "'" << endl;
                 } else {
+                    cout << "home-security: failed saving (" << camera->GetWidth() << "x" << camera->GetHeight() << ") image to '" << detectedFilename << "'" << endl;
+                }
 
-                    hs_detection.setActive( true );
-                    hs_detection.setStarttime();
+                /*
+                 * Construct dynamically a new email message and send it
+                 */
+                if( hs_detection.isEmailAllowed() ) {
 
-                    /*
-                     * save image to jpeg file
-                     */
-                    if( saveImageRGBA( detectedFilename, (float4*)imgRGBA, camera->GetWidth(), camera->GetHeight(), 255.0f, 100 ) ) {
-                        cout << "home-security: saved (" << camera->GetWidth() << "x" << camera->GetHeight() << ") image to '" << detectedFilename << "'" << endl;
-                    } else {
-                        cout << "home-security: failed saving (" << camera->GetWidth() << "x" << camera->GetHeight() << ") image to '" << detectedFilename << "'" << endl;
-                    }
-
-                    /*
-                     * Construct dynamically a new email message and send it
-                     */
                     emailMessage email( numDetections, detections, net, detectedFilename );
                     if( email.send() == CURLE_OK ) {
                         cout << "home-security: email sent." << endl;
                     } else {
                         cout << "home-security: email send failed." << endl;
                     }
+
+                    hs_detection.setEmailAllowed( false );
                 }
-            } else {
-
-                if( hs_detection.isActive() ) {
-
-                    if( hs_detection.getDuration() > 30 ) {
-                        cout << "home-security: hs_detection NOT A PERSON, " << hs_detection.getDuration() << " seconds active" << endl;
-                        hs_detection.setActive( false );
-                    } else {
-                        cout << "home-security: hs_detection NOT A PERSON, " << hs_detection.getDuration() << " seconds active" << endl;
-                    }
-
-                }
-            }
-        } else {
-
-            if( hs_detection.isActive() ) {
-
-                if( hs_detection.getDuration() > 30 ) {
-                    cout << "home-security: hs_detection NO DETECTION, " << hs_detection.getDuration() << " seconds active" << endl;
-                    hs_detection.setActive( false );
-                } else {
-                    cout << "home-security: hs_detection NO DETECTION, " << hs_detection.getDuration() << " seconds active" << endl;
-                }
-
             }
         }
     }

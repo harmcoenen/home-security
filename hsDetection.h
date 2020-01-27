@@ -14,11 +14,14 @@
 
 //using namespace std;
 
+#define TIME_SLICE_DURATION 60
+
 class hsDetection {
 
     /* Member Variables */
     bool mActive;
-    time_t mStarttime;
+    bool mEmailAllowed;
+    time_t mSlicetime;
     double mDuration;
 
 public:
@@ -27,7 +30,9 @@ public:
 
     void setActive( bool );
     bool isActive( void );
-    void setStarttime( void );
+    void setEmailAllowed( bool );
+    bool isEmailAllowed( void );
+    void resetSlicetime( void );
     double getDuration( void );
 };
 
