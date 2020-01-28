@@ -1,7 +1,7 @@
 #ifndef __EMAIL_MESSAGE_H__
 #define __EMAIL_MESSAGE_H__
 
-#include <time.h>
+#include <ctime>
 #include <math.h>
 #include <stdio.h>
 #include <iostream>

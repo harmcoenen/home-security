@@ -15,8 +15,6 @@
 
 using namespace std;
 
-const char* detectedFilename = "/home/nano/Pictures/detected.jpeg";
-
 bool signal_recieved = false;
 
 #endif /* __HOME_SECURITY_H__ */

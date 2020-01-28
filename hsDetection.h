@@ -1,20 +1,29 @@
 #ifndef __HS_DETECTION_H__
 #define __HS_DETECTION_H__
 
-#include <time.h>
+#include <ctime>
 #include <math.h>
 #include <stdio.h>
 #include <iostream>
+#include <iomanip>
 #include <vector>
 #include <string>
+#include <sys/stat.h> 
+#include <sys/types.h> 
 #include <curl/curl.h>
+#include <bits/stdc++.h> 
 #include <jetson-utils/filesystem.h>
 #include <jetson-utils/commandLine.h>
 #include <jetson-inference/detectNet.h>
 
-//using namespace std;
 
-#define TIME_SLICE_DURATION 60
+using namespace std;
+
+static const char *capture_subdir = "cap";
+static const char *uploads_subdir = "upl";
+static const char *extension_photo = "_jn.jpeg";
+
+#define TIME_SLICE_DURATION 60 /* In seconds */
 
 class hsDetection {
 
@@ -23,6 +32,8 @@ class hsDetection {
     bool mEmailAllowed;
     time_t mSlicetime;
     double mDuration;
+    string mImageFilename;
+    int mImageSequenceNumber;  /* may wrap around */
 
 public:
     hsDetection();
@@ -34,6 +45,8 @@ public:
     bool isEmailAllowed( void );
     void resetSlicetime( void );
     double getDuration( void );
+    void setImageFilename( void );
+    const char* getImageFilename( void );
 };
 
 #endif /* __HS_DETECTION_H__ */

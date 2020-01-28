@@ -153,12 +153,13 @@ int main( int argc, char** argv )
             /*
              * Print the number of detected objects
              */
-            cout << "home-security: " << numDetections << " objects detected, " << endl;
 
             int personFound = 0;
             for( int n=0; n < numDetections; n++ )
                 if( strcmp( net->GetClassDesc( detections[n].ClassID ), "person" ) == 0 )
                     personFound++;
+
+            cout << "home-security: " << numDetections << " objects detected of which " << personFound << " person(s)" << endl;
 
             /*
              * Save image to file and send it in an email, but only if a 'person' is detected
@@ -168,10 +169,11 @@ int main( int argc, char** argv )
                 /*
                  * save image to jpeg file
                  */
-                if( saveImageRGBA( detectedFilename, (float4*)imgRGBA, camera->GetWidth(), camera->GetHeight(), 255.0f, 100 ) ) {
-                    cout << "home-security: saved (" << camera->GetWidth() << "x" << camera->GetHeight() << ") image to '" << detectedFilename << "'" << endl;
+                hs_detection.setImageFilename();
+                if( saveImageRGBA( hs_detection.getImageFilename(), (float4*)imgRGBA, camera->GetWidth(), camera->GetHeight(), 255.0f, 100 ) ) {
+                    cout << "home-security: saved (" << camera->GetWidth() << "x" << camera->GetHeight() << ") image to '" << hs_detection.getImageFilename() << "'" << endl;
                 } else {
-                    cout << "home-security: failed saving (" << camera->GetWidth() << "x" << camera->GetHeight() << ") image to '" << detectedFilename << "'" << endl;
+                    cout << "home-security: failed saving (" << camera->GetWidth() << "x" << camera->GetHeight() << ") image to '" << hs_detection.getImageFilename() << "'" << endl;
                 }
 
                 /*
@@ -179,7 +181,7 @@ int main( int argc, char** argv )
                  */
                 if( hs_detection.isEmailAllowed() ) {
 
-                    emailMessage email( numDetections, detections, net, detectedFilename );
+                    emailMessage email( numDetections, detections, net, hs_detection.getImageFilename() );
                     if( email.send() == CURLE_OK ) {
                         cout << "home-security: email sent." << endl;
                     } else {

@@ -1,7 +1,7 @@
 #include "emailMessage.h"
 
 // constructor
-emailMessage::emailMessage( const int numDetections, detectNet::Detection* detections, detectNet* net, const char* detectedFilename ) {
+emailMessage::emailMessage( const int numDetections, detectNet::Detection* detections, detectNet* net, const char* imageFilename ) {
 
     string marker( MARKER );
     mSubject = SUBJECT;
@@ -27,7 +27,7 @@ emailMessage::emailMessage( const int numDetections, detectNet::Detection* detec
     /* Fill the Inline HTML with dynamic data */
     mBaseInlineHTML.replace( mBaseInlineHTML.find( marker ), marker.length(), dynamicHTML( numDetections, detections, net ) );
 
-    mAttachment = detectedFilename;
+    mAttachment = imageFilename;
 }
 
 // destructor
