@@ -53,6 +53,17 @@ int usage()
     return 0;
 }
 
+void myFTPstuff() 
+{
+    cout << "----------------myFTPstuff start" << endl;
+    while( program_running ) {
+        cout << "--------------------myFTPstuff still running." << endl;
+        std::this_thread::sleep_for( std::chrono::seconds( 10 ) );
+    }
+    cout << "----------------myFTPstuff end" << endl;
+}
+
+
 int main( int argc, char** argv )
 {
     /*
@@ -118,6 +129,8 @@ int main( int argc, char** argv )
     cout << "home-security: camera open for streaming" << endl;
 
     hsDetection hs_detection;
+
+    thread myFTPprog( myFTPstuff );
 
     /*
      * processing loop
@@ -198,6 +211,10 @@ int main( int argc, char** argv )
      * destroy resources
      */
     cout << "home-security:  shutting down..." << endl;
+
+    // synchronize threads
+    program_running = false;
+    myFTPprog.join();    // pauses until myFTPprog finishes
 
     SAFE_DELETE(camera);
     SAFE_DELETE(net);

@@ -16,5 +16,6 @@
 using namespace std;
 
 bool signal_recieved = false;
+bool program_running = true;
 
 #endif /* __HOME_SECURITY_H__ */
