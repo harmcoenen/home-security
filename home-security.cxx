@@ -67,7 +67,7 @@ void myFTPstuff()
 int main( int argc, char** argv )
 {
     /*
-     * parse command line
+     * Parse command line
      */
     commandLine cmdLine(argc, argv);
 
@@ -75,13 +75,13 @@ int main( int argc, char** argv )
         return usage();
 
     /*
-     * attach signal handler
+     * Attach signal handler
      */
     if( signal(SIGINT, sig_handler) == SIG_ERR )
         cout << "home-security: can't catch SIGINT" << endl;
 
     /*
-     * create the camera device
+     * Create the camera device
      */
     gstCamera* camera = gstCamera::Create(cmdLine.GetInt("width", gstCamera::DefaultWidth),
                                           cmdLine.GetInt("height", gstCamera::DefaultHeight),
@@ -89,7 +89,7 @@ int main( int argc, char** argv )
 
     if( !camera )
     {
-        cout << "home-security: failed to initialize camera device" << endl;
+        cerr << "home-security: failed to initialize camera device" << endl;
         return 0;
     }
     
@@ -99,7 +99,7 @@ int main( int argc, char** argv )
     cout << "    depth:  " << camera->GetPixelDepth() << " (bpp)" << endl;
 
     /*
-     * create detection network
+     * Create detection network
      */
     detectNet* net = detectNet::Create(argc, argv);
     
@@ -113,16 +113,16 @@ int main( int argc, char** argv )
     cout << "home-security: max detections is [" << net->GetMaxDetections() << "]" << endl;
 
     /*
-     * parse overlay flags
+     * Parse overlay flags
      */
     const uint32_t overlayFlags = detectNet::OverlayFlagsFromStr(cmdLine.GetString("overlay", "box,labels,conf"));
 
     /*
-     * start streaming
+     * Start streaming
      */
     if( !camera->Open() )
     {
-        cout << "home-security: failed to open camera for streaming" << endl;
+        cerr << "home-security: failed to open camera for streaming" << endl;
         return 0;
     }
 
@@ -133,11 +133,13 @@ int main( int argc, char** argv )
     thread myFTPprog( myFTPstuff );
 
     /*
-     * processing loop
+     * Main processing loop
      */
     while( !signal_recieved )
     {
-        /* Wait some time before each detection to keep the device cool */
+        /* 
+         * Wait some time before each detection to keep the device cool
+         */
         std::this_thread::sleep_for( std::chrono::seconds( 1 ) );
 
         if( hs_detection.getDuration() > TIME_SLICE_DURATION ) {
@@ -148,30 +150,30 @@ int main( int argc, char** argv )
         cout << "home-security: " << hs_detection.getDuration() << " seconds active" << endl;
 
         /*
-         * capture RGBA image
+         * Capture RGBA image
          */
         float* imgRGBA = NULL;
 
-        if( !camera->CaptureRGBA(&imgRGBA, 1000, true) ) /* timeout of 1000 msec and set zeroCopy to 'true' to access the image pixels from CPU */
-            cout << "home-security: failed to capture RGBA image from camera" << endl;
+        if( !camera->CaptureRGBA(&imgRGBA, 1000, true) ) /* Timeout of 1000 msec and set zeroCopy to 'true' to access the image pixels from CPU */
+            cerr << "home-security: failed to capture RGBA image from camera" << endl;
 
         /*
-         * detect objects in the frame
+         * Detect objects in the frame
          */
         detectNet::Detection* detections = NULL;
     
         const int numDetections = net->Detect(imgRGBA, camera->GetWidth(), camera->GetHeight(), &detections, overlayFlags);
         
         if( numDetections > 0 ) {
-            /*
-             * Print the number of detected objects
-             */
 
             int personFound = 0;
             for( int n=0; n < numDetections; n++ )
                 if( strcmp( net->GetClassDesc( detections[n].ClassID ), "person" ) == 0 )
                     personFound++;
 
+            /*
+             * Print the number of detected objects
+             */
             cout << "home-security: " << numDetections << " objects detected of which " << personFound << " person(s)" << endl;
 
             /*
@@ -180,13 +182,13 @@ int main( int argc, char** argv )
             if( personFound ) {
 
                 /*
-                 * save image to jpeg file
+                 * Save image to jpeg file
                  */
                 hs_detection.setImageFilename();
-                if( saveImageRGBA( hs_detection.getImageFilename(), (float4*)imgRGBA, camera->GetWidth(), camera->GetHeight(), 255.0f, 100 ) ) {
-                    cout << "home-security: saved (" << camera->GetWidth() << "x" << camera->GetHeight() << ") image to '" << hs_detection.getImageFilename() << "'" << endl;
+                if( saveImageRGBA( hs_detection.getCapImageFilename(), (float4*)imgRGBA, camera->GetWidth(), camera->GetHeight(), 255.0f, 100 ) ) {
+                    cout << "home-security: saved (" << camera->GetWidth() << "x" << camera->GetHeight() << ") image to '" << hs_detection.getCapImageFilename() << "'" << endl;
                 } else {
-                    cout << "home-security: failed saving (" << camera->GetWidth() << "x" << camera->GetHeight() << ") image to '" << hs_detection.getImageFilename() << "'" << endl;
+                    cerr << "home-security: failed saving (" << camera->GetWidth() << "x" << camera->GetHeight() << ") image to '" << hs_detection.getCapImageFilename() << "'" << endl;
                 }
 
                 /*
@@ -194,15 +196,25 @@ int main( int argc, char** argv )
                  */
                 if( hs_detection.isEmailAllowed() ) {
 
-                    emailMessage email( numDetections, detections, net, hs_detection.getImageFilename() );
+                    emailMessage email( numDetections, detections, net, hs_detection.getCapImageFilename() );
                     if( email.send() == CURLE_OK ) {
                         cout << "home-security: email sent." << endl;
                     } else {
-                        cout << "home-security: email send failed." << endl;
+                        cerr << "home-security: email send failed." << endl;
                     }
 
                     hs_detection.setEmailAllowed( false );
                 }
+
+                /*
+                 * Move the captured image to the upload location
+                 */
+                if ( rename( hs_detection.getCapImageFilename(), hs_detection.getUplImageFilename() ) == -1 ) {
+                    cerr << "home-security: Failed to move file [" << hs_detection.getCapImageFilename() << "] to [" << hs_detection.getUplImageFilename() << "]" << endl;
+                } else {
+                    cout << "home-security: Moved file [" << hs_detection.getCapImageFilename() << "] to [" << hs_detection.getUplImageFilename() << "]" << endl;
+                }
+
             }
         }
     }

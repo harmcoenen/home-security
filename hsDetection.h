@@ -32,7 +32,8 @@ class hsDetection {
     bool mEmailAllowed;
     time_t mSlicetime;
     double mDuration;
-    string mImageFilename;
+    string mCapImageFilename;
+    string mUplImageFilename;
     int mImageSequenceNumber;  /* may wrap around */
 
 public:
@@ -46,7 +47,8 @@ public:
     void resetSlicetime( void );
     double getDuration( void );
     void setImageFilename( void );
-    const char* getImageFilename( void );
+    const char* getCapImageFilename( void );
+    const char* getUplImageFilename( void );
 };
 
 #endif /* __HS_DETECTION_H__ */
