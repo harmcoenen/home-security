@@ -12,6 +12,7 @@
 
 #include "hsDetection.h"
 #include "hsEmailMessage.h"
+#include "hsFTP.h"
 
 using namespace std;
 

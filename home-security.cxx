@@ -130,6 +130,12 @@ int main( int argc, char** argv )
 
     hsDetection hs_detection;
 
+    /*
+     * Setup FTP credentials
+     */
+    hsFTP hs_ftp;
+    hs_ftp.setCredentials( cmdLine.GetString("user", "user"), cmdLine.GetString("password", "password"));
+    cout << "home-security: Credentials are [" << hs_ftp.getCredentials() << "]" << endl;
     thread myFTPprog( myFTPstuff );
 
     /*
