@@ -1,7 +1,7 @@
-#include "emailMessage.h"
+#include "hsEmailMessage.h"
 
 // constructor
-emailMessage::emailMessage( const int numDetections, detectNet::Detection* detections, detectNet* net, const char* imageFilename ) {
+hsEmailMessage::hsEmailMessage( const int numDetections, detectNet::Detection* detections, detectNet* net, const char* imageFilename ) {
 
     string marker( MARKER );
     mSubject = SUBJECT;
@@ -31,12 +31,12 @@ emailMessage::emailMessage( const int numDetections, detectNet::Detection* detec
 }
 
 // destructor
-emailMessage::~emailMessage() {
+hsEmailMessage::~hsEmailMessage() {
 }
 
 
 // Send the email
-int emailMessage::send( void ) {
+int hsEmailMessage::send( void ) {
     CURL *curl;
     CURLcode res = CURLE_OK;
 
@@ -139,20 +139,20 @@ int emailMessage::send( void ) {
     return (int)res;
 }
 
-void emailMessage::printHeader( void ) {
+void hsEmailMessage::printHeader( void ) {
     for( int i = 0; i < mHeader.size(); i++ )
         cout << mHeader[i] << endl;
 }
 
-void emailMessage::printInlineText( void ) {
+void hsEmailMessage::printInlineText( void ) {
     cout << mBaseInlineText << endl;
 }
 
-void emailMessage::printInlineHTML( void ) {
+void hsEmailMessage::printInlineHTML( void ) {
     cout << mBaseInlineHTML << endl;
 }
 
-size_t emailMessage::timeFormatted( void ) {
+size_t hsEmailMessage::timeFormatted( void ) {
   time_t rawtime;
   struct tm * timeinfo;
 
@@ -162,7 +162,7 @@ size_t emailMessage::timeFormatted( void ) {
   return( strftime( mTimeString, MAX_TIME_STRING, "Date: %a, %d %b %G %H:%M:%S %z", timeinfo ) );
 }
 
-string emailMessage::dynamicText( const int numDetections, detectNet::Detection* detections, detectNet* net ) {
+string hsEmailMessage::dynamicText( const int numDetections, detectNet::Detection* detections, detectNet* net ) {
     string tempText;
 
     for( int n=0; n < numDetections; n++ )
@@ -199,7 +199,7 @@ string emailMessage::dynamicText( const int numDetections, detectNet::Detection*
     return( tempText );
 }
 
-string emailMessage::dynamicHTML( const int numDetections, detectNet::Detection* detections, detectNet* net ) {
+string hsEmailMessage::dynamicHTML( const int numDetections, detectNet::Detection* detections, detectNet* net ) {
     string tempHTML( "<table> <tr> <th>Obj #</th> <th>Class ID</th> <th>Class Description</th> <th>Confidence</th> <th>Left</th> <th>Top</th> <th>Right</th> <th>Bottom</th> <th>Width</th> <th>Height</th> <th>Area</th> </tr>" );
 
     for( int n=0; n < numDetections; n++ )

@@ -1,5 +1,5 @@
-#ifndef __EMAIL_MESSAGE_H__
-#define __EMAIL_MESSAGE_H__
+#ifndef __HS_EMAIL_MESSAGE_H__
+#define __HS_EMAIL_MESSAGE_H__
 
 #include <ctime>
 #include <math.h>
@@ -53,7 +53,7 @@ using namespace std;
                     "</body>\r\n" \
                     "</html>\r\n"
 
-class emailMessage {
+class hsEmailMessage {
 
     /* Member Variables */
     vector<string> mHeader;
@@ -64,8 +64,8 @@ class emailMessage {
     char mTimeString [MAX_TIME_STRING];
 
 public:
-    emailMessage( const int, detectNet::Detection*, detectNet*, const char* );
-    ~emailMessage();
+    hsEmailMessage( const int, detectNet::Detection*, detectNet*, const char* );
+    ~hsEmailMessage();
 
     int send( void );
 
@@ -79,4 +79,4 @@ private:
     string dynamicHTML( const int, detectNet::Detection*, detectNet* );
 };
 
-#endif /* __EMAIL_MESSAGE_H__ */
+#endif /* __HS_EMAIL_MESSAGE_H__ */

@@ -196,7 +196,7 @@ int main( int argc, char** argv )
                  */
                 if( hs_detection.isEmailAllowed() ) {
 
-                    emailMessage email( numDetections, detections, net, hs_detection.getCapImageFilename() );
+                    hsEmailMessage email( numDetections, detections, net, hs_detection.getCapImageFilename() );
                     if( email.send() == CURLE_OK ) {
                         cout << "home-security: email sent." << endl;
                     } else {

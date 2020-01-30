@@ -11,7 +11,7 @@
 #include <jetson-inference/detectNet.h>
 
 #include "hsDetection.h"
-#include "emailMessage.h"
+#include "hsEmailMessage.h"
 
 using namespace std;
 
