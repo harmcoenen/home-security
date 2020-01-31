@@ -21,7 +21,7 @@
  */
 #include "home-security.h"
 
-void sig_handler(int signo)
+void sig_handler( int signo )
 {
     if( signo == SIGINT )
     {
@@ -64,12 +64,10 @@ void ftpMainLoop( const char* username, const char* password ) {
     /*
      * FTP main processing loop
      */
-    cout << "---------------- ftpMainLoop start" << endl;
     while( program_running ) {
-        cout << "-------------------- ftpMainLoop still running." << endl;
-        std::this_thread::sleep_for( std::chrono::seconds( 10 ) );
+        std::this_thread::sleep_for( std::chrono::minutes( 1 ) );
     }
-    cout << "---------------- ftpMainLoop end" << endl;
+    cout << "home-security: ftpMainLoop end" << endl;
 }
 
 int main( int argc, char** argv )
@@ -77,23 +75,23 @@ int main( int argc, char** argv )
     /*
      * Parse command line
      */
-    commandLine cmdLine(argc, argv);
+    commandLine cmdLine( argc, argv );
 
-    if( cmdLine.GetFlag("help") )
+    if( cmdLine.GetFlag( "help" ) )
         return usage();
 
     /*
      * Attach signal handler
      */
-    if( signal(SIGINT, sig_handler) == SIG_ERR )
+    if( signal( SIGINT, sig_handler ) == SIG_ERR )
         cout << "home-security: can't catch SIGINT" << endl;
 
     /*
      * Create the camera device
      */
-    gstCamera* camera = gstCamera::Create(cmdLine.GetInt("width", gstCamera::DefaultWidth),
-                                          cmdLine.GetInt("height", gstCamera::DefaultHeight),
-                                          cmdLine.GetString("camera"));
+    gstCamera* camera = gstCamera::Create( cmdLine.GetInt( "width", gstCamera::DefaultWidth ),
+                                           cmdLine.GetInt( "height", gstCamera::DefaultHeight ),
+                                           cmdLine.GetString( "camera" ) );
 
     if( !camera )
     {
@@ -109,7 +107,7 @@ int main( int argc, char** argv )
     /*
      * Create detection network
      */
-    detectNet* net = detectNet::Create(argc, argv);
+    detectNet* net = detectNet::Create( argc, argv );
     
     if( !net )
     {
@@ -123,7 +121,7 @@ int main( int argc, char** argv )
     /*
      * Parse overlay flags
      */
-    const uint32_t overlayFlags = detectNet::OverlayFlagsFromStr(cmdLine.GetString("overlay", "box,labels,conf"));
+    const uint32_t overlayFlags = detectNet::OverlayFlagsFromStr( cmdLine.GetString( "overlay", "box,labels,conf" ) );
 
     /*
      * Start streaming
@@ -138,7 +136,7 @@ int main( int argc, char** argv )
 
     hsDetection hs_detection;
 
-    thread hsFTPthread( ftpMainLoop, cmdLine.GetString("user", "user"), cmdLine.GetString("password", "password") );
+    thread hsFTPthread( ftpMainLoop, cmdLine.GetString( "user", "user" ), cmdLine.GetString( "password", "password" ) );
 
     /*
      * Main processing loop
@@ -155,14 +153,12 @@ int main( int argc, char** argv )
             hs_detection.setEmailAllowed( true );
         }
 
-        cout << "home-security: " << hs_detection.getDuration() << " seconds active" << endl;
-
         /*
          * Capture RGBA image
          */
         float* imgRGBA = NULL;
 
-        if( !camera->CaptureRGBA(&imgRGBA, 1000, true) ) /* Timeout of 1000 msec and set zeroCopy to 'true' to access the image pixels from CPU */
+        if( !camera->CaptureRGBA( &imgRGBA, 1000, true ) ) /* Timeout of 1000 msec and set zeroCopy to 'true' to access the image pixels from CPU */
             cerr << "home-security: failed to capture RGBA image from camera" << endl;
 
         /*
@@ -170,7 +166,7 @@ int main( int argc, char** argv )
          */
         detectNet::Detection* detections = NULL;
     
-        const int numDetections = net->Detect(imgRGBA, camera->GetWidth(), camera->GetHeight(), &detections, overlayFlags);
+        const int numDetections = net->Detect( imgRGBA, camera->GetWidth(), camera->GetHeight(), &detections, overlayFlags );
         
         if( numDetections > 0 ) {
 
@@ -228,18 +224,17 @@ int main( int argc, char** argv )
     }
 
     /*
-     * destroy resources
-     */
-    cout << "home-security:  shutting down..." << endl;
-
-    /*
      * Synchronize threads, pauses until thread finishes
      */
+    cout << "home-security:  shutting down...   Waiting for ftpMainLoop to end. This might take a minute." << endl;
     program_running = false;
     hsFTPthread.join();
 
-    SAFE_DELETE(camera);
-    SAFE_DELETE(net);
+    /*
+     * Destroy resources
+     */
+    SAFE_DELETE( camera );
+    SAFE_DELETE( net );
 
     cout << "home-security:  shutdown complete." << endl;
     return 0;
