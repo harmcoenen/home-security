@@ -4,10 +4,10 @@
 #include <ctime>
 #include <math.h>
 #include <stdio.h>
-#include <iostream>
 #include <iomanip>
 #include <vector>
 #include <string>
+#include <iostream>
 #include <sys/stat.h> 
 #include <sys/types.h> 
 #include <curl/curl.h>
@@ -15,13 +15,9 @@
 #include <jetson-utils/filesystem.h>
 #include <jetson-utils/commandLine.h>
 #include <jetson-inference/detectNet.h>
-
+#include "home-security.h"
 
 using namespace std;
-
-static const char *capture_subdir = "cap";
-static const char *uploads_subdir = "upl";
-static const char *extension_photo = "_jn.jpeg";
 
 #define TIME_SLICE_DURATION 60 /* In seconds */
 

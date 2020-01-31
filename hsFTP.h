@@ -2,9 +2,9 @@
 #define __HS_FTP_H__
 
 #include <ctime>
+#include <string>
 #include <stdio.h>
 #include <iostream>
-#include <string>
 #include <curl/curl.h>
 #include <jetson-utils/filesystem.h>
 #include <jetson-utils/commandLine.h>

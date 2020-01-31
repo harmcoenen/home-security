@@ -4,9 +4,9 @@
 #include <ctime>
 #include <math.h>
 #include <stdio.h>
-#include <iostream>
 #include <vector>
 #include <string>
+#include <iostream>
 #include <curl/curl.h>
 #include <jetson-utils/filesystem.h>
 #include <jetson-utils/commandLine.h>
