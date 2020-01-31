@@ -53,16 +53,24 @@ int usage()
     return 0;
 }
 
-void myFTPstuff() 
-{
-    cout << "----------------myFTPstuff start" << endl;
+void ftpMainLoop( const char* username, const char* password ) {
+    /*
+     * Setup FTP and its credentials
+     */
+    hsFTP hs_ftp;
+    hs_ftp.setCredentials( username, password );
+    cout << "home-security: Credentials are [" << hs_ftp.getCredentials() << "]" << endl;
+
+    /*
+     * FTP main processing loop
+     */
+    cout << "---------------- ftpMainLoop start" << endl;
     while( program_running ) {
-        cout << "--------------------myFTPstuff still running." << endl;
+        cout << "-------------------- ftpMainLoop still running." << endl;
         std::this_thread::sleep_for( std::chrono::seconds( 10 ) );
     }
-    cout << "----------------myFTPstuff end" << endl;
+    cout << "---------------- ftpMainLoop end" << endl;
 }
-
 
 int main( int argc, char** argv )
 {
@@ -130,13 +138,7 @@ int main( int argc, char** argv )
 
     hsDetection hs_detection;
 
-    /*
-     * Setup FTP credentials
-     */
-    hsFTP hs_ftp;
-    hs_ftp.setCredentials( cmdLine.GetString("user", "user"), cmdLine.GetString("password", "password"));
-    cout << "home-security: Credentials are [" << hs_ftp.getCredentials() << "]" << endl;
-    thread myFTPprog( myFTPstuff );
+    thread hsFTPthread( ftpMainLoop, cmdLine.GetString("user", "user"), cmdLine.GetString("password", "password") );
 
     /*
      * Main processing loop
@@ -230,9 +232,11 @@ int main( int argc, char** argv )
      */
     cout << "home-security:  shutting down..." << endl;
 
-    // synchronize threads
+    /*
+     * Synchronize threads, pauses until thread finishes
+     */
     program_running = false;
-    myFTPprog.join();    // pauses until myFTPprog finishes
+    hsFTPthread.join();
 
     SAFE_DELETE(camera);
     SAFE_DELETE(net);
