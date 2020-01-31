@@ -8,6 +8,7 @@
 #include <curl/curl.h>
 #include <jetson-utils/filesystem.h>
 #include <jetson-utils/commandLine.h>
+#include "home-security.h"
 
 using namespace std;
 
@@ -24,6 +25,7 @@ public:
 
     void setCredentials( const char*, const char* );
     const char* getCredentials( void );
+    int uploadFiles();
 };
 
 

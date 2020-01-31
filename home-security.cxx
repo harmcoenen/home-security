@@ -65,8 +65,12 @@ void ftpMainLoop( const char* username, const char* password ) {
      * FTP main processing loop
      */
     while( program_running ) {
+
         std::this_thread::sleep_for( std::chrono::minutes( 1 ) );
+
+        hs_ftp.uploadFiles();
     }
+
     cout << "home-security: ftpMainLoop end" << endl;
 }
 
