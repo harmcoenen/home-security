@@ -1,5 +1,5 @@
 #!/bin/bash
-export CAM_USER="usernaam"
-export CAM_PASS="paswoord"
+export HS_USER="usernaam"
+export HS_PASS="paswoord"
 
-./home-security --user="$CAM_USER" --password="$CAM_PASS" --threshold=0.95 --overlay none
+./home-security --user="$HS_USER" --password="$HS_PASS" --threshold=0.95 --overlay none
