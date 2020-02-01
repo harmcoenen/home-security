@@ -153,13 +153,13 @@ void hsEmailMessage::printInlineHTML( void ) {
 }
 
 size_t hsEmailMessage::timeFormatted( void ) {
-  time_t rawtime;
-  struct tm * timeinfo;
+    time_t rawtime;
+    struct tm * timeinfo;
 
-  time( &rawtime );
-  timeinfo = localtime( &rawtime );
+    time( &rawtime );
+    timeinfo = localtime( &rawtime );
 
-  return( strftime( mTimeString, MAX_TIME_STRING, "Date: %a, %d %b %G %H:%M:%S %z", timeinfo ) );
+    return( strftime( mTimeString, MAX_TIME_STRING, "Date: %a, %d %b %G %H:%M:%S %z", timeinfo ) );
 }
 
 string hsEmailMessage::dynamicText( const int numDetections, detectNet::Detection* detections, detectNet* net ) {

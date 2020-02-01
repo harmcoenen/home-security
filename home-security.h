@@ -24,4 +24,9 @@ static const char *capture_subdir = "cap";
 static const char *uploads_subdir = "upl";
 static const char *extension_photo = "_jn.jpeg";
 
+struct MemoryStruct {
+    char *memory;
+    size_t size;
+};
+
 #endif /* __HOME_SECURITY_H__ */

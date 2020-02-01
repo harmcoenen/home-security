@@ -12,12 +12,17 @@
 
 using namespace std;
 
-#define FTP_URL "ftp://ftp.familiecoenen.nl/"
+/* ftp.familiecoenen.nl port 21, /public/www/recordings */
+static const char *remote_url = "ftp://ftp.familiecoenen.nl/";
+
+static size_t readCallback( void*, size_t, size_t, FILE* );
+static size_t writeMemoryCallback( void*, size_t, size_t, void*);
 
 class hsFTP {
 
     /* Member Variables */
     string mCredentials;
+    string mRemoteDir;
 
 public:
     hsFTP();
@@ -25,7 +30,9 @@ public:
 
     void setCredentials( const char*, const char* );
     const char* getCredentials( void );
-    int uploadFiles();
+    void setRemoteDir( void );
+    const char* getRemoteDir( void );
+    int uploadFiles( void );
 };
 
 
