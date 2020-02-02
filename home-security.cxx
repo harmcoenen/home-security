@@ -69,6 +69,7 @@ void ftpMainLoop( const char* username, const char* password ) {
         std::this_thread::sleep_for( std::chrono::minutes( 1 ) );
 
         hs_ftp.uploadFiles();
+        hs_ftp.cleanupRemote();
     }
 
     cout << "home-security: ftpMainLoop end" << endl;
