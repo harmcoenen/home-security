@@ -53,26 +53,58 @@ int usage()
     return 0;
 }
 
-void ftpMainLoop( const char* username, const char* password ) {
+void ftpUploadLoop( const char* username, const char* password ) {
+    int progress = 0;
+    int boundary = 60;
     /*
      * Setup FTP and its credentials
      */
-    hsFTP hs_ftp;
-    hs_ftp.setCredentials( username, password );
-    cout << "home-security: Credentials are [" << hs_ftp.getCredentials() << "]" << endl;
+    hsFTP hs_ftp_upload;
+    hs_ftp_upload.setCredentials( username, password );
+    cout << "home-security: Credentials for ftpUploadLoop are [" << hs_ftp_upload.getCredentials() << "]" << endl;
 
     /*
-     * FTP main processing loop
+     * FTP Upload main processing loop
      */
     while( program_running ) {
 
-        std::this_thread::sleep_for( std::chrono::minutes( 1 ) );
+        std::this_thread::sleep_for( std::chrono::seconds( 1 ) );
 
-        hs_ftp.uploadFiles();
-        hs_ftp.cleanupRemote();
+        progress++;
+        if( (progress % boundary) == 0 ) {
+            progress = 0;
+            cout << "home-security: Uploaded " << hs_ftp_upload.uploadFiles() << " files" << endl;
+        }
     }
 
-    cout << "home-security: ftpMainLoop end" << endl;
+    cout << "home-security: ftpUploadLoop end" << endl;
+}
+
+void ftpCleanupLoop( const char* username, const char* password ) {
+    int progress = 0;
+    int boundary = 120;
+    /*
+     * Setup FTP and its credentials
+     */
+    hsFTP hs_ftp_cleanup;
+    hs_ftp_cleanup.setCredentials( username, password );
+    cout << "home-security: Credentials for ftpCleanupLoop are [" << hs_ftp_cleanup.getCredentials() << "]" << endl;
+
+    /*
+     * FTP Upload main processing loop
+     */
+    while( program_running ) {
+
+        std::this_thread::sleep_for( std::chrono::seconds( 1 ) );
+
+        progress++;
+        if( (progress % boundary) == 0 ) {
+            progress = 0;
+            hs_ftp_cleanup.cleanupRemote();
+        }
+    }
+
+    cout << "home-security: ftpCleanupLoop end" << endl;
 }
 
 int main( int argc, char** argv )
@@ -141,7 +173,8 @@ int main( int argc, char** argv )
 
     hsDetection hs_detection;
 
-    thread hsFTPthread( ftpMainLoop, cmdLine.GetString( "user", "user" ), cmdLine.GetString( "password", "password" ) );
+    thread ftpUploadthread( ftpUploadLoop, cmdLine.GetString( "user", "user" ), cmdLine.GetString( "password", "password" ) );
+    thread ftpCleanupthread( ftpCleanupLoop, cmdLine.GetString( "user", "user" ), cmdLine.GetString( "password", "password" ) );
 
     /*
      * Main processing loop
@@ -233,7 +266,8 @@ int main( int argc, char** argv )
      */
     cout << "home-security:  shutting down...   Waiting for ftpMainLoop to end. This might take a minute." << endl;
     program_running = false;
-    hsFTPthread.join();
+    ftpUploadthread.join();
+    ftpCleanupthread.join();
 
     /*
      * Destroy resources

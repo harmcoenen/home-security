@@ -14,7 +14,7 @@
 using namespace std;
 
 #define DAY_IN_SECONDS (60 * 60 * 24)
-#define RETENTION_PERIOD (DAY_IN_SECONDS * 31)
+#define RETENTION_PERIOD (DAY_IN_SECONDS * 60)
 
 /* ftp.familiecoenen.nl port 21, /public/www/recordings */
 static const char *remote_url = "ftp://ftp.familiecoenen.nl/";
