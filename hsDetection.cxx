@@ -27,23 +27,22 @@ bool hsDetection::isActive( void ) {
     return( mActive );
 }
 
+void hsDetection::handleTimeSlice( void ) {
+    time_t now;
+    time( &now );
+
+    if( difftime( now, mSlicetime ) > TIME_SLICE_DURATION ) {
+        time( &mSlicetime );
+        mEmailAllowed = true;
+    }
+}
+
 void hsDetection::setEmailAllowed( bool allowed ) {
     mEmailAllowed = allowed;
 }
 
 bool hsDetection::isEmailAllowed( void ) {
     return( mEmailAllowed );
-}
-
-void hsDetection::resetSlicetime( void ) {
-    time( &mSlicetime );
-}
-
-double hsDetection::getDuration( void ) {
-    time_t now;
-    time( &now );
-
-    return( difftime( now, mSlicetime ) );
 }
 
 void hsDetection::setImageFilename( void ) {

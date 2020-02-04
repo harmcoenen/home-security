@@ -38,10 +38,9 @@ public:
 
     void setActive( bool );
     bool isActive( void );
+    void handleTimeSlice( void );
     void setEmailAllowed( bool );
     bool isEmailAllowed( void );
-    void resetSlicetime( void );
-    double getDuration( void );
     void setImageFilename( void );
     const char* getCapImageFilename( void );
     const char* getUplImageFilename( void );

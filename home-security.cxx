@@ -55,7 +55,7 @@ int usage()
 
 void ftpUploadLoop( const char* username, const char* password ) {
     int progress = 0;
-    int boundary = 60;
+    int boundary = 60; /* 60 seconds is one minute */
     /*
      * Setup FTP and its credentials
      */
@@ -82,7 +82,7 @@ void ftpUploadLoop( const char* username, const char* password ) {
 
 void ftpCleanupLoop( const char* username, const char* password ) {
     int progress = 0;
-    int boundary = 120;
+    int boundary = 1800; /* 1800 seconds is half an hour */
     /*
      * Setup FTP and its credentials
      */
@@ -186,10 +186,7 @@ int main( int argc, char** argv )
          */
         std::this_thread::sleep_for( std::chrono::seconds( 1 ) );
 
-        if( hs_detection.getDuration() > TIME_SLICE_DURATION ) {
-            hs_detection.resetSlicetime();
-            hs_detection.setEmailAllowed( true );
-        }
+        hs_detection.handleTimeSlice();
 
         /*
          * Capture RGBA image
