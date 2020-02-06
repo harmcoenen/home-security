@@ -107,6 +107,25 @@ void ftpCleanupLoop( const char* username, const char* password ) {
     cout << "home-security: ftpCleanupLoop end" << endl;
 }
 
+int countInterestingObjects( const int numDetections, detectNet::Detection* detections, detectNet* net ) {
+    int interestingObjects = 0;
+
+    /*
+     * Loop through the detections to find a match with interesting objects
+     */
+    for( int n=0; n < numDetections; n++ )
+        if( ( strcmp( net->GetClassDesc( detections[n].ClassID ), "person" ) == 0 ) ||
+            ( strcmp( net->GetClassDesc( detections[n].ClassID ), "dog"    ) == 0 ) )
+            interestingObjects++;
+
+    /*
+     * Print the number of detected objects
+     */
+    cout << "home-security: " << numDetections << " objects detected of which " << interestingObjects << " are interesting" << endl;
+
+    return( interestingObjects );
+}
+
 int main( int argc, char** argv )
 {
     /*
@@ -205,20 +224,12 @@ int main( int argc, char** argv )
         
         if( numDetections > 0 ) {
 
-            int personFound = 0;
-            for( int n=0; n < numDetections; n++ )
-                if( strcmp( net->GetClassDesc( detections[n].ClassID ), "person" ) == 0 )
-                    personFound++;
+            int interestingObjects = countInterestingObjects( numDetections, detections, net );
 
             /*
-             * Print the number of detected objects
+             * Save image to file and send it in an email, but only if something interesting is detected
              */
-            cout << "home-security: " << numDetections << " objects detected of which " << personFound << " person(s)" << endl;
-
-            /*
-             * Save image to file and send it in an email, but only if a 'person' is detected
-             */
-            if( personFound ) {
+            if( interestingObjects ) {
 
                 /*
                  * Save image to jpeg file
