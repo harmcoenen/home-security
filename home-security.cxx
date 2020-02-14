@@ -37,6 +37,8 @@ int usage()
     cout << "Locate objects in a live camera stream using an object detection DNN." << endl << endl;
     cout << "Arguments:" << endl;
     cout << "  --help            show this help message and exit" << endl;
+    cout << "  --user=<username> Username for uploading images to FTP server" << endl;
+    cout << "  --password=<pwd>  Password for uploading images to FTP server" << endl;
     cout << "  --network NETWORK pre-trained model to load (see below for options)" << endl;
     cout << "  --overlay OVERLAY detection overlay flags (e.g. --overlay=box,labels,conf)" << endl;
     cout << "                    valid combinations are:  'box', 'labels', 'conf', 'none'" << endl;
