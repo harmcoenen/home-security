@@ -37,6 +37,7 @@ int usage()
     cout << "Locate objects in a live camera stream using an object detection DNN." << endl << endl;
     cout << "Arguments:" << endl;
     cout << "  --help            show this help message and exit" << endl;
+    cout << "  --ipaddr=<ipaddr> IP address of eth0 interface to be used for rstp" << endl;
     cout << "  --user=<username> Username for uploading images to FTP server" << endl;
     cout << "  --password=<pwd>  Password for uploading images to FTP server" << endl;
     cout << "  --network NETWORK pre-trained model to load (see below for options)" << endl;
@@ -196,6 +197,8 @@ int main( int argc, char** argv )
 
     thread ftpUploadthread( ftpUploadLoop, cmdLine.GetString( "user", "user" ), cmdLine.GetString( "password", "password" ) );
     thread ftpCleanupthread( ftpCleanupLoop, cmdLine.GetString( "user", "user" ), cmdLine.GetString( "password", "password" ) );
+
+    cout << "home-security: Going to use IP address " << cmdLine.GetString( "ipaddr", "192.168.178.249" ) << endl;
 
     /*
      * Main processing loop
