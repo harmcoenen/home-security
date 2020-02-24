@@ -198,7 +198,12 @@ int main( int argc, char** argv )
     thread ftpUploadthread( ftpUploadLoop, cmdLine.GetString( "user", "user" ), cmdLine.GetString( "password", "password" ) );
     thread ftpCleanupthread( ftpCleanupLoop, cmdLine.GetString( "user", "user" ), cmdLine.GetString( "password", "password" ) );
 
+
+    /*
+     * Create the RSTP pipeline
+     */
     cout << "home-security: Going to use IP address " << cmdLine.GetString( "ipaddr", "192.168.178.249" ) << endl;
+    hsRSTP* rstp_pipeline = hsRSTP::Create();
 
     /*
      * Main processing loop
