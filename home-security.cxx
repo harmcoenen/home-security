@@ -37,9 +37,10 @@ int usage()
     cout << "Locate objects in a live camera stream using an object detection DNN." << endl << endl;
     cout << "Arguments:" << endl;
     cout << "  --help            show this help message and exit" << endl;
-    cout << "  --ipaddr=<ipaddr> IP address of eth0 interface to be used for rstp" << endl;
-    cout << "  --user=<username> Username for uploading images to FTP server" << endl;
-    cout << "  --password=<pwd>  Password for uploading images to FTP server" << endl;
+    cout << "  --user=<username> Username for uploading images to FTP server and RTSP streaming" << endl;
+    cout << "  --password=<pwd>  Password for uploading images to FTP server and RTSP streaming" << endl;
+    cout << "  --ipaddr=<ipaddr> IP address of eth0 interface to be used for RTSP stream" << endl;
+    cout << "  --port=<port>     Port number for RTSP stream broadcast" << endl;
     cout << "  --network NETWORK pre-trained model to load (see below for options)" << endl;
     cout << "  --overlay OVERLAY detection overlay flags (e.g. --overlay=box,labels,conf)" << endl;
     cout << "                    valid combinations are:  'box', 'labels', 'conf', 'none'" << endl;
@@ -200,10 +201,21 @@ int main( int argc, char** argv )
 
 
     /*
-     * Create the RSTP pipeline
+     * Create the RTSP stream
      */
-    cout << "home-security: Going to use IP address " << cmdLine.GetString( "ipaddr", "192.168.178.249" ) << endl;
-    hsRSTP* rstp_pipeline = hsRSTP::Create();
+    hsRTSP* rtsp_stream = hsRTSP::Create( cmdLine.GetString( "user", "user" ),
+                                          cmdLine.GetString( "password", "password" ),
+                                          cmdLine.GetString( "ipaddr", hsRTSP::DefaultRtspIpAddress ),
+                                          cmdLine.GetString( "port", hsRTSP::DefaultRtspPort ),
+                                          cmdLine.GetInt( "width", hsRTSP::DefaultWidth ),
+                                          cmdLine.GetInt( "height", hsRTSP::DefaultHeight ),
+                                          cmdLine.GetString( "camera" )
+                                          );
+    if( !rtsp_stream )
+    {
+        cerr << "home-security: failed to create RTSP stream" << endl;
+        return 0;
+    }
 
     /*
      * Main processing loop
@@ -290,6 +302,7 @@ int main( int argc, char** argv )
     /*
      * Destroy resources
      */
+    SAFE_DELETE( rtsp_stream );
     SAFE_DELETE( camera );
     SAFE_DELETE( net );
 
