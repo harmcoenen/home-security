@@ -27,30 +27,32 @@ hsRTSP* hsRTSP::Create( const char* username,
     rtsp->mIpAddress = ipaddr;
     rtsp->mPort      = port;
 
-    cout << "RTSP Create: Going to use Username   : " << rtsp->mUserName.c_str() << endl;
-    cout << "RTSP Create: Going to use Password   : " << rtsp->mPassWord.c_str() << endl;
-    cout << "RTSP Create: Going to use IP Address : " << rtsp->mIpAddress.c_str() << endl;
-    cout << "RTSP Create: Going to use Port       : " << rtsp->mPort.c_str() << endl;
+    /*
+    cout << "hsRTSP: Going to use Username   : " << rtsp->mUserName.c_str() << endl;
+    cout << "hsRTSP: Going to use Password   : " << rtsp->mPassWord.c_str() << endl;
+    cout << "hsRTSP: Going to use IP Address : " << rtsp->mIpAddress.c_str() << endl;
+    cout << "hsRTSP: Going to use Port       : " << rtsp->mPort.c_str() << endl;
+    */
 
     if( !rtsp->init( GST_SOURCE_NVARGUS ) )
     {
-        cerr << "hsRTSP: failed to init gstCamera GST_SOURCE_NVARGUS, " << rtsp->mCameraStr.c_str() << endl;
+        cerr << "hsRTSP: failed to init rtsp stream with GST_SOURCE_NVARGUS, " << rtsp->mCameraStr.c_str() << endl;
 
         if( !rtsp->init( GST_SOURCE_NVCAMERA ) )
         {
-            cerr << "hsRTSP: failed to init gstCamera GST_SOURCE_NVCAMERA, " << rtsp->mCameraStr.c_str() << endl;
+            cerr << "hsRTSP: failed to init rtsp stream with GST_SOURCE_NVCAMERA, " << rtsp->mCameraStr.c_str() << endl;
 
             if( rtsp->mSensorCSI >= 0 ) rtsp->mSensorCSI = -1;
 
             if( !rtsp->init( GST_SOURCE_V4L2 ) )
             {
-                cerr << "hsRTSP: failed to init gstCamera GST_SOURCE_V4L2, " << rtsp->mCameraStr.c_str() << endl;
+                cerr << "hsRTSP: failed to init rtsp stream with GST_SOURCE_V4L2, " << rtsp->mCameraStr.c_str() << endl;
                 return NULL;
             }
         }
     }
 
-    cout << "hsRTSP: gstCamera successfully initialized with " << rtsp->mCameraStr.c_str() << endl;
+    cout << "hsRTSP: rtsp stream successfully initialized with " << rtsp->mCameraStr.c_str() << endl;
     return rtsp;
 }
 
@@ -79,6 +81,13 @@ hsRTSP::hsRTSP()
 hsRTSP::~hsRTSP()
 {
 }
+
+// getLaunchStr
+const char* hsRTSP::getLaunchStr( void )
+{
+    return( mLaunchStr.c_str() );
+}
+
 
 // init
 bool hsRTSP::init( gstCameraSrc src )
@@ -136,7 +145,6 @@ bool hsRTSP::buildLaunchStr( gstCameraSrc src )
 
     mLaunchStr = ss.str();
 
-    cout << "hsRTSP: gstCamera pipeline string: " << mLaunchStr.c_str() << endl;
     return true;
 }
 

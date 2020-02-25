@@ -26,6 +26,7 @@ public:
                            const char* password,
                            const char* camera=NULL );
     ~hsRTSP();
+    const char* getLaunchStr( void );
 
     static constexpr const char* DefaultRtspIpAddress = "192.168.178.249";
     static constexpr const char* DefaultRtspPort = "8554";
@@ -43,15 +44,15 @@ private:
     uint32_t mDepth;
     uint32_t mSize;
 
-    std::string mUserName;
-    std::string mPassWord;
-    std::string mIpAddress;
-    std::string mPort;
+    string mUserName;
+    string mPassWord;
+    string mIpAddress;
+    string mPort;
 
     gstCameraSrc mSource;
 
-    std::string  mLaunchStr;
-    std::string  mCameraStr;
+    string  mLaunchStr;
+    string  mCameraStr;
 
     int mSensorCSI;
     inline bool csiCamera() const { return ( mSensorCSI >= 0 ); }

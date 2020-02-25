@@ -111,6 +111,10 @@ void ftpCleanupLoop( const char* username, const char* password ) {
     cout << "home-security: ftpCleanupLoop end" << endl;
 }
 
+void rtspStreamLoop( hsRTSP* rtsp_stream ) {
+    cout << "home-security: pipeline launch string: " << rtsp_stream->getLaunchStr() << endl;
+}
+
 int countInterestingObjects( const int numDetections, detectNet::Detection* detections, detectNet* net ) {
     int interestingObjects = 0;
 
@@ -199,7 +203,6 @@ int main( int argc, char** argv )
     thread ftpUploadthread( ftpUploadLoop, cmdLine.GetString( "user", "user" ), cmdLine.GetString( "password", "password" ) );
     thread ftpCleanupthread( ftpCleanupLoop, cmdLine.GetString( "user", "user" ), cmdLine.GetString( "password", "password" ) );
 
-
     /*
      * Create the RTSP stream
      */
@@ -216,6 +219,8 @@ int main( int argc, char** argv )
         cerr << "home-security: failed to create RTSP stream" << endl;
         return 0;
     }
+
+    thread rtspStreamthread( rtspStreamLoop, rtsp_stream );
 
     /*
      * Main processing loop
@@ -294,10 +299,11 @@ int main( int argc, char** argv )
     /*
      * Synchronize threads, pauses until thread finishes
      */
-    cout << "home-security:  shutting down...   Waiting for ftpMainLoop to end. This might take a minute." << endl;
+    cout << "home-security:  shutting down...   Waiting for threads to end. This might take a minute." << endl;
     program_running = false;
     ftpUploadthread.join();
     ftpCleanupthread.join();
+    rtspStreamthread.join();
 
     /*
      * Destroy resources
