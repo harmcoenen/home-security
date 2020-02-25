@@ -112,7 +112,6 @@ void ftpCleanupLoop( const char* username, const char* password ) {
 }
 
 void rtspStreamLoop( hsRTSP* rtsp_stream ) {
-    cout << "home-security: pipeline launch string: " << rtsp_stream->getLaunchStr() << endl;
     rtsp_stream->startServing();
 }
 

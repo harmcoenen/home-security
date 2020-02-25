@@ -75,19 +75,12 @@ hsRTSP::hsRTSP()
     mSize   = 0;
 
     mSource = GST_SOURCE_NVCAMERA;
-
     mSensorCSI  = -1;
 }
 
 // destructor
 hsRTSP::~hsRTSP()
 {
-}
-
-// getLaunchStr
-const char* hsRTSP::getLaunchStr()
-{
-    return( mLaunchStr.c_str() );
 }
 
 // startServing
@@ -127,7 +120,8 @@ void hsRTSP::startServing()
     gst_rtsp_server_attach( server, NULL );
 
     /* start serving */
-    cout << "hsRTSP: stream ready at rtsp://" << mIpAddress.c_str() << ":" << mPort.c_str() << "/test" << endl;
+    cout << "hsRTSP: pipeline launch string: " << mLaunchStr.c_str() << endl;
+    cout << "hsRTSP: stream serving at rtsp://" << mIpAddress.c_str() << ":" << mPort.c_str() << "/test" << endl;
     g_main_loop_run( mServingLoop );
 }
 
@@ -192,7 +186,8 @@ bool hsRTSP::buildLaunchStr( gstCameraSrc src )
         mSource = GST_SOURCE_V4L2;
     }
 
-    mLaunchStr = ss.str();
+    //mLaunchStr = ss.str();
+    mLaunchStr = "videotestsrc ! x264enc ! rtph264pay name=pay0 pt=96";
 
     return true;
 }

@@ -26,7 +26,6 @@ public:
                            const char* password,
                            const char* camera=NULL );
     ~hsRTSP();
-    const char* getLaunchStr();
 
     void startServing();
     void stopServing();
