@@ -113,6 +113,7 @@ void ftpCleanupLoop( const char* username, const char* password ) {
 
 void rtspStreamLoop( hsRTSP* rtsp_stream ) {
     cout << "home-security: pipeline launch string: " << rtsp_stream->getLaunchStr() << endl;
+    rtsp_stream->startServing();
 }
 
 int countInterestingObjects( const int numDetections, detectNet::Detection* detections, detectNet* net ) {
@@ -303,6 +304,7 @@ int main( int argc, char** argv )
     program_running = false;
     ftpUploadthread.join();
     ftpCleanupthread.join();
+    rtsp_stream->stopServing();
     rtspStreamthread.join();
 
     /*

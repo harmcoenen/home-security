@@ -67,6 +67,8 @@ hsRTSP* hsRTSP::Create( const char* username,
 // constructor
 hsRTSP::hsRTSP()
 {
+    mServingLoop = NULL;
+
     mWidth  = 0;
     mHeight = 0;
     mDepth  = 0;
@@ -83,11 +85,58 @@ hsRTSP::~hsRTSP()
 }
 
 // getLaunchStr
-const char* hsRTSP::getLaunchStr( void )
+const char* hsRTSP::getLaunchStr()
 {
     return( mLaunchStr.c_str() );
 }
 
+// startServing
+void hsRTSP::startServing()
+{
+    GstRTSPServer *server;
+    GstRTSPMountPoints *mounts;
+    GstRTSPMediaFactory *factory;
+
+    mServingLoop = g_main_loop_new( NULL, FALSE );
+
+    /* create a server instance */
+    server = gst_rtsp_server_new();
+    //g_object_set( server, "service", port, NULL );
+    g_object_set( server, "service", mPort.c_str(), NULL );
+    gst_rtsp_server_set_address( server, mIpAddress.c_str() ); /* IP address of Jetson Nano */
+
+    /* get the mount points for this server, every server has a default object
+    * that be used to map uri mount points to media factories */
+    mounts = gst_rtsp_server_get_mount_points( server );
+
+    /* make a media factory for a test stream. The default media factory can use
+    * gst-launch syntax to create pipelines.
+    * any launch line works as long as it contains elements named pay%d. Each
+    * element with pay%d names will be a stream */
+    factory = gst_rtsp_media_factory_new();
+    gst_rtsp_media_factory_set_launch( factory, mLaunchStr.c_str() );
+    gst_rtsp_media_factory_set_shared( factory, TRUE );
+
+    /* attach the test factory to the /test url */
+    gst_rtsp_mount_points_add_factory( mounts, "/test", factory );
+
+    /* don't need the ref to the mapper anymore */
+    g_object_unref( mounts );
+
+    /* attach the server to the default maincontext */
+    gst_rtsp_server_attach( server, NULL );
+
+    /* start serving */
+    cout << "hsRTSP: stream ready at rtsp://" << mIpAddress.c_str() << ":" << mPort.c_str() << "/test" << endl;
+    g_main_loop_run( mServingLoop );
+}
+
+// stopServing
+void hsRTSP::stopServing()
+{
+    if( g_main_loop_is_running( mServingLoop ) )
+        g_main_loop_quit( mServingLoop );
+}
 
 // init
 bool hsRTSP::init( gstCameraSrc src )

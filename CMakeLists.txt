@@ -12,7 +12,8 @@ find_package(PkgConfig)
 pkg_check_modules(GST REQUIRED gstreamer-1.0>=1.4
                                gstreamer-sdp-1.0>=1.4
                                gstreamer-video-1.0>=1.4
-                               gstreamer-app-1.0>=1.4)
+                               gstreamer-app-1.0>=1.4
+                               gstreamer-rtsp-server-1.0=1.13.91)
 message("-- GST_LIBRARY_DIRS: ${GST_LIBRARY_DIRS}")
 message("-- GST_INCLUDE_DIRS: ${GST_INCLUDE_DIRS}")
 message("-- GST_CFLAGS:       ${GST_CFLAGS}")
@@ -59,7 +60,17 @@ message("-- CURL_LIBRARIES: ${CURL_LIBRARIES}")
 pkg_check_modules(GLIB REQUIRED glib-2.0>=2.23)
 #include_directories(${GLIB_INCLUDE_DIRS})
 #link_directories(${GLIB_LIBRARY_DIRS})
+#message("-- GLIB_INCLUDE_DIRS: ${GLIB_INCLUDE_DIRS}")
+#message("-- GLIB_LIBRARY_DIRS: ${GLIB_LIBRARY_DIRS}")
+#message("-- GLIB_LIBRARIES   : ${GLIB_LIBRARIES}")
 
+# Adding gobject library
+pkg_check_modules(GOBJECT REQUIRED gobject-2.0>=2.23)
+#include_directories(${GOBJECT_INCLUDE_DIRS})
+#link_directories(${GOBJECT_LIBRARY_DIRS})
+#message("-- GOBJECT_INCLUDE_DIRS: ${GOBJECT_INCLUDE_DIRS}")
+#message("-- GOBJECT_LIBRARY_DIRS: ${GOBJECT_LIBRARY_DIRS}")
+#message("-- GOBJECT_LIBRARIES   : ${GOBJECT_LIBRARIES}")
 
 # Include
 #include_directories( ${CUDA_INCLUDE_DIRS} )
@@ -74,7 +85,7 @@ cuda_add_executable(home-security ${home-securitySources})
 #add_executable(home-security ${home-securitySources})
 
 # Link home-security to the jetson-inference library
-target_link_libraries(home-security jetson-inference jetson-utils curl ${GLIB_LIBRARIES})
+target_link_libraries(home-security jetson-inference jetson-utils curl ${GOBJECT_LIBRARIES} ${GST_LIBRARIES})
 
 install(TARGETS home-security DESTINATION bin)
 
