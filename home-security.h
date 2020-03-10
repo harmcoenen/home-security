@@ -18,13 +18,20 @@
 
 using namespace std;
 
-static bool signal_recieved = false;
 static bool program_running = true;
 
 static const char *capture_subdir = "cap";
 static const char *uploads_subdir = "upl";
 static const char *extension_photo = "_jn.jpeg";
 static const char *delimiter = "\n";
+
+enum States {
+    PREPARE_DETECTION,
+    DETECTION,
+    PREPARE_STREAMING,
+    STREAMING,
+    STOPPING
+};
 
 struct MemoryStruct {
     char *memory;

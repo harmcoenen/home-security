@@ -27,8 +27,9 @@ public:
                            const char* camera=NULL );
     ~hsRTSP();
 
-    void startServing();
-    void stopServing();
+    void startStreaming();
+    void stopStreaming();
+    bool isStreaming();
 
     static constexpr const char* DefaultRtspIpAddress = "192.168.178.249";
     static constexpr const char* DefaultRtspPort = "8554";
@@ -42,6 +43,7 @@ private:
     bool parseCameraStr( const char* camera );
 
     GMainLoop *mServingLoop;
+    bool mStreaming;
 
     uint32_t mWidth;
     uint32_t mHeight;

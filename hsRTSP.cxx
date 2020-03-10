@@ -68,6 +68,7 @@ hsRTSP* hsRTSP::Create( const char* username,
 hsRTSP::hsRTSP()
 {
     mServingLoop = NULL;
+    mStreaming = false;
 
     mWidth  = 0;
     mHeight = 0;
@@ -83,13 +84,14 @@ hsRTSP::~hsRTSP()
 {
 }
 
-// startServing
-void hsRTSP::startServing()
+// startStreaming
+void hsRTSP::startStreaming()
 {
     GstRTSPServer *server;
     GstRTSPMountPoints *mounts;
     GstRTSPMediaFactory *factory;
 
+    mStreaming = true;
     mServingLoop = g_main_loop_new( NULL, FALSE );
 
     /* create a server instance */
@@ -125,11 +127,18 @@ void hsRTSP::startServing()
     g_main_loop_run( mServingLoop );
 }
 
-// stopServing
-void hsRTSP::stopServing()
+// stopStreaming
+void hsRTSP::stopStreaming()
 {
     if( g_main_loop_is_running( mServingLoop ) )
         g_main_loop_quit( mServingLoop );
+    mStreaming = false;
+}
+
+// isStreaming
+bool hsRTSP::isStreaming()
+{
+    return( mStreaming );
 }
 
 // init

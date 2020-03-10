@@ -26,7 +26,7 @@ void sig_handler( int signo )
     if( signo == SIGINT )
     {
         cout << "home-security: received SIGINT" << endl;
-        signal_recieved = true;
+        program_running = false;
     }
 }
 
@@ -95,7 +95,7 @@ void ftpCleanupLoop( const char* username, const char* password ) {
     cout << "home-security: Credentials for ftpCleanupLoop are [" << hs_ftp_cleanup.getCredentials() << "]" << endl;
 
     /*
-     * FTP Upload main processing loop
+     * FTP Cleanup main processing loop
      */
     while( program_running ) {
 
@@ -112,7 +112,7 @@ void ftpCleanupLoop( const char* username, const char* password ) {
 }
 
 void rtspStreamLoop( hsRTSP* rtsp_stream ) {
-    rtsp_stream->startServing();
+    rtsp_stream->startStreaming();
 }
 
 int countInterestingObjects( const int numDetections, detectNet::Detection* detections, detectNet* net ) {
@@ -132,6 +132,117 @@ int countInterestingObjects( const int numDetections, detectNet::Detection* dete
     cout << "home-security: " << numDetections << " objects detected of which " << interestingObjects << " are interesting" << endl;
 
     return( interestingObjects );
+}
+
+States handleStatePrepareDetection( hsRTSP* rtsp_stream, gstCamera* camera) {
+    States new_state = DETECTION;
+
+    if( rtsp_stream->isStreaming() )
+        rtsp_stream->stopStreaming();
+
+    if( !camera->Open() )
+    {
+        cerr << "home-security: failed to open camera for streaming" << endl;
+        new_state = STOPPING;
+    }
+
+    return( new_state );
+}
+
+void handleStateDetection( hsDetection hs_detection, gstCamera* camera, detectNet* net, const uint32_t overlayFlags ) {
+    /* 
+     * Wait some time before each detection to keep the device cool
+     */
+    std::this_thread::sleep_for( std::chrono::seconds( 1 ) );
+
+    hs_detection.handleTimeSlice();
+
+    /*
+     * Capture RGBA image
+     */
+    float* imgRGBA = NULL;
+
+    if( !camera->CaptureRGBA( &imgRGBA, 1000, true ) ) /* Timeout of 1000 msec and set zeroCopy to 'true' to access the image pixels from CPU */
+        cerr << "home-security: failed to capture RGBA image from camera" << endl;
+
+    /*
+     * Detect objects in the frame
+     */
+    detectNet::Detection* detections = NULL;
+
+    const int numDetections = net->Detect( imgRGBA, camera->GetWidth(), camera->GetHeight(), &detections, overlayFlags );
+    
+    if( numDetections > 0 ) {
+
+        int interestingObjects = countInterestingObjects( numDetections, detections, net );
+
+        /*
+         * Save image to file and send it in an email, but only if something interesting is detected
+         */
+        if( interestingObjects ) {
+
+            /*
+             * Save image to jpeg file
+             */
+            hs_detection.setImageFilename();
+            if( saveImageRGBA( hs_detection.getCapImageFilename(), (float4*)imgRGBA, camera->GetWidth(), camera->GetHeight(), 255.0f, 100 ) ) {
+                cout << "home-security: saved (" << camera->GetWidth() << "x" << camera->GetHeight() << ") image to '" << hs_detection.getCapImageFilename() << "'" << endl;
+            } else {
+                cerr << "home-security: failed saving (" << camera->GetWidth() << "x" << camera->GetHeight() << ") image to '" << hs_detection.getCapImageFilename() << "'" << endl;
+            }
+
+            /*
+             * Construct dynamically a new email message and send it
+             */
+            if( hs_detection.isEmailAllowed() ) {
+
+                hsEmailMessage email( numDetections, detections, net, hs_detection.getCapImageFilename() );
+                if( email.send() == CURLE_OK ) {
+                    cout << "home-security: email sent." << endl;
+                } else {
+                    cerr << "home-security: email send failed." << endl;
+                }
+
+                hs_detection.setEmailAllowed( false );
+            }
+
+            /*
+             * Move the captured image to the upload location
+             */
+            if ( rename( hs_detection.getCapImageFilename(), hs_detection.getUplImageFilename() ) == -1 ) {
+                cerr << "home-security: Failed to move file [" << hs_detection.getCapImageFilename() << "] to [" << hs_detection.getUplImageFilename() << "]" << endl;
+            } else {
+                cout << "home-security: Moved file [" << hs_detection.getCapImageFilename() << "] to [" << hs_detection.getUplImageFilename() << "]" << endl;
+            }
+
+        }
+    }
+}
+
+States handleStatePrepareStreaming( hsRTSP* rtsp_stream, gstCamera* camera) {
+    States new_state = STREAMING;
+
+    camera->Close();
+
+    if( !rtsp_stream->isStreaming() ) {
+        thread rtspStreamthread( rtspStreamLoop, rtsp_stream );
+        rtspStreamthread.detach();
+    }
+
+    return( new_state );
+}
+
+void handleStateStreaming( hsRTSP* rtsp_stream ) {
+    /* 
+     * Wait some time to keep the device cool
+     */
+    std::this_thread::sleep_for( std::chrono::seconds( 1 ) );
+
+    if( rtsp_stream->isStreaming() ) {
+        cout << "home-security: RTSP serving" << endl;
+    } else {
+        cerr << "home-security: RTSP, but not serving" << endl;
+    }
 }
 
 int main( int argc, char** argv )
@@ -187,16 +298,6 @@ int main( int argc, char** argv )
      */
     const uint32_t overlayFlags = detectNet::OverlayFlagsFromStr( cmdLine.GetString( "overlay", "box,labels,conf" ) );
 
-    /*
-     * Start streaming
-     */
-    if( !camera->Open() )
-    {
-        cerr << "home-security: failed to open camera for streaming" << endl;
-        return 0;
-    }
-
-    cout << "home-security: camera open for streaming" << endl;
 
     hsDetection hs_detection;
 
@@ -220,91 +321,48 @@ int main( int argc, char** argv )
         return 0;
     }
 
-    thread rtspStreamthread( rtspStreamLoop, rtsp_stream );
+    /*
+     * Start in the prepare detection state
+     */
+    States state = PREPARE_DETECTION;
 
     /*
      * Main processing loop
      */
-    while( !signal_recieved )
+    while( program_running )
     {
-        /* 
-         * Wait some time before each detection to keep the device cool
-         */
-        std::this_thread::sleep_for( std::chrono::seconds( 1 ) );
-
-        hs_detection.handleTimeSlice();
-
-        /*
-         * Capture RGBA image
-         */
-        float* imgRGBA = NULL;
-
-        if( !camera->CaptureRGBA( &imgRGBA, 1000, true ) ) /* Timeout of 1000 msec and set zeroCopy to 'true' to access the image pixels from CPU */
-            cerr << "home-security: failed to capture RGBA image from camera" << endl;
-
-        /*
-         * Detect objects in the frame
-         */
-        detectNet::Detection* detections = NULL;
-    
-        const int numDetections = net->Detect( imgRGBA, camera->GetWidth(), camera->GetHeight(), &detections, overlayFlags );
-        
-        if( numDetections > 0 ) {
-
-            int interestingObjects = countInterestingObjects( numDetections, detections, net );
-
-            /*
-             * Save image to file and send it in an email, but only if something interesting is detected
-             */
-            if( interestingObjects ) {
-
-                /*
-                 * Save image to jpeg file
-                 */
-                hs_detection.setImageFilename();
-                if( saveImageRGBA( hs_detection.getCapImageFilename(), (float4*)imgRGBA, camera->GetWidth(), camera->GetHeight(), 255.0f, 100 ) ) {
-                    cout << "home-security: saved (" << camera->GetWidth() << "x" << camera->GetHeight() << ") image to '" << hs_detection.getCapImageFilename() << "'" << endl;
-                } else {
-                    cerr << "home-security: failed saving (" << camera->GetWidth() << "x" << camera->GetHeight() << ") image to '" << hs_detection.getCapImageFilename() << "'" << endl;
-                }
-
-                /*
-                 * Construct dynamically a new email message and send it
-                 */
-                if( hs_detection.isEmailAllowed() ) {
-
-                    hsEmailMessage email( numDetections, detections, net, hs_detection.getCapImageFilename() );
-                    if( email.send() == CURLE_OK ) {
-                        cout << "home-security: email sent." << endl;
-                    } else {
-                        cerr << "home-security: email send failed." << endl;
-                    }
-
-                    hs_detection.setEmailAllowed( false );
-                }
-
-                /*
-                 * Move the captured image to the upload location
-                 */
-                if ( rename( hs_detection.getCapImageFilename(), hs_detection.getUplImageFilename() ) == -1 ) {
-                    cerr << "home-security: Failed to move file [" << hs_detection.getCapImageFilename() << "] to [" << hs_detection.getUplImageFilename() << "]" << endl;
-                } else {
-                    cout << "home-security: Moved file [" << hs_detection.getCapImageFilename() << "] to [" << hs_detection.getUplImageFilename() << "]" << endl;
-                }
-
-            }
+        switch (state)  {
+            case PREPARE_DETECTION:
+                state = handleStatePrepareDetection( rtsp_stream , camera);
+                break;
+            case DETECTION:
+                handleStateDetection( hs_detection, camera, net, overlayFlags );
+                break;
+            case PREPARE_STREAMING:
+                state = handleStatePrepareStreaming( rtsp_stream , camera);
+                break;
+            case STREAMING:
+                handleStateStreaming( rtsp_stream );
+                break;
+            case STOPPING:
+                program_running = false;
+                break;
+            default:
+                cerr << "home-security: unknown state " << state << endl;
+                program_running = false;
+                break;
         }
     }
 
     /*
-     * Synchronize threads, pauses until thread finishes
+     * Synchronize threads, pauses until threads are finished
      */
     cout << "home-security:  shutting down...   Waiting for threads to end. This might take a minute." << endl;
-    program_running = false;
-    ftpUploadthread.join();
-    ftpCleanupthread.join();
-    rtsp_stream->stopServing();
-    rtspStreamthread.join();
+    if( ftpUploadthread.joinable() )
+        ftpUploadthread.join();
+    if( ftpCleanupthread.joinable() )
+        ftpCleanupthread.join();
+    rtsp_stream->stopStreaming();
 
     /*
      * Destroy resources
