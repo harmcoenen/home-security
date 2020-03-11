@@ -134,16 +134,27 @@ int countInterestingObjects( const int numDetections, detectNet::Detection* dete
     return( interestingObjects );
 }
 
-States handleStatePrepareDetection( hsRTSP* rtsp_stream, gstCamera* camera) {
+States handleStatePrepareDetection( hsRTSP* rtsp_stream, gstCamera* camera ) {
     States new_state = DETECTION;
 
     if( rtsp_stream->isStreaming() )
         rtsp_stream->stopStreaming();
 
-    if( !camera->Open() )
-    {
-        cerr << "home-security: failed to open camera for streaming" << endl;
+    if( !camera ) {
+        cerr << "home-security: failed to initialize camera device" << endl;
         new_state = STOPPING;
+    } else {
+        cout << "home-security: successfully initialized camera device" << endl;
+        cout << "    width:  " << camera->GetWidth() << endl;
+        cout << "   height:  " << camera->GetHeight() << endl;
+        cout << "    depth:  " << camera->GetPixelDepth() << " (bpp)" << endl;
+
+        if( !camera->Open() ) {
+            cerr << "home-security: failed to open camera for streaming" << endl;
+            new_state = STOPPING;
+        } else {
+            cout << "home-security: successfully opened camera device" << endl;
+        }
     }
 
     return( new_state );
@@ -287,22 +298,9 @@ int main( int argc, char** argv )
         cout << "home-security: can't catch SIGINT" << endl;
 
     /*
-     * Create the camera device
+     * Prepare a camera
      */
-    gstCamera* camera = gstCamera::Create( cmdLine.GetInt( "width", gstCamera::DefaultWidth ),
-                                           cmdLine.GetInt( "height", gstCamera::DefaultHeight ),
-                                           cmdLine.GetString( "camera" ) );
-
-    if( !camera )
-    {
-        cerr << "home-security: failed to initialize camera device" << endl;
-        return 0;
-    }
-    
-    cout << "home-security: successfully initialized camera device" << endl;
-    cout << "    width:  " << camera->GetWidth() << endl;
-    cout << "   height:  " << camera->GetHeight() << endl;
-    cout << "    depth:  " << camera->GetPixelDepth() << " (bpp)" << endl;
+    gstCamera* camera = NULL;
 
     /*
      * Create detection network
@@ -358,27 +356,46 @@ int main( int argc, char** argv )
     {
         switch (state)  {
             case PREPARE_DETECTION:
-                state = handleStatePrepareDetection( rtsp_stream , camera);
+                cout << "home-security: State machine case PREPARE_DETECTION " << state << endl;
+                /*
+                 * Create the camera device
+                 */
+                SAFE_DELETE( camera );
+                camera = gstCamera::Create( cmdLine.GetInt( "width", gstCamera::DefaultWidth ),
+                                            cmdLine.GetInt( "height", gstCamera::DefaultHeight ),
+                                            cmdLine.GetString( "camera" ) );
+                state = handleStatePrepareDetection( rtsp_stream , camera );
+                if( camera == NULL ) {
+                    cout << "home-security: camera is NULL" << endl;
+                } else {
+                    cout << "home-security: camera is DEFINED" << endl;
+                }
                 break;
             case DETECTION:
+                cout << "home-security: State machine case DETECTION " << state << endl;
                 handleStateDetection( hs_detection, camera, net, overlayFlags );
                 break;
             case PREPARE_STREAMING:
+                cout << "home-security: State machine case PREPARE_STREAMING " << state << endl;
                 state = handleStatePrepareStreaming( rtsp_stream , camera);
                 break;
             case STREAMING:
+                cout << "home-security: State machine case STREAMING " << state << endl;
                 handleStateStreaming( rtsp_stream );
                 break;
             case STOPPING:
+                cout << "home-security: State machine case STOPPING " << state << endl;
                 program_running = false;
                 break;
             default:
-                cerr << "home-security: unknown state " << state << endl;
+                cerr << "home-security: default unknown state " << state << endl;
                 program_running = false;
                 break;
         }
 
+        cout << "home-security: End of switch in state machine, current state is " << state << endl;
         state = handleStateChangeEvents( state );
+        cout << "home-security: End ofhandleStateChangeEvents, current/new state is " << state << endl;
     }
 
     /*
