@@ -14,7 +14,7 @@
 
 using namespace std;
 
-#define SMTP_URL "smtp://smtp.ziggo.nl"
+#define SMTP_URL "smtp://smtp.trined.nl"
 #define FROM     "<jetson@familiecoenen.nl>"
 #define TO       "<harm@familiecoenen.nl>"
 #define CC       "<info@familiecoenen.nl>"

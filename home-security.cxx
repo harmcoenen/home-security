@@ -149,7 +149,7 @@ States handleStatePrepareDetection( hsRTSP* rtsp_stream, gstCamera* camera) {
     return( new_state );
 }
 
-void handleStateDetection( hsDetection hs_detection, gstCamera* camera, detectNet* net, const uint32_t overlayFlags ) {
+void handleStateDetection( hsDetection &hs_detection, gstCamera* camera, detectNet* net, const uint32_t overlayFlags ) {
     /* 
      * Wait some time before each detection to keep the device cool
      */
@@ -243,6 +243,31 @@ void handleStateStreaming( hsRTSP* rtsp_stream ) {
     } else {
         cerr << "home-security: RTSP, but not serving" << endl;
     }
+}
+
+States handleStateChangeEvents( States state ) {
+    States new_state = state;
+
+    if( hsFileExist( gotodetection ) ) {
+        new_state = PREPARE_DETECTION;
+        if( remove( gotodetection.c_str() ) != 0 )
+            cerr << "home-security: Error removing file " << gotodetection.c_str() << endl;
+        else
+            cout << "home-security: File " << gotodetection.c_str() << " removed"  << endl;
+    }
+
+    if( hsFileExist( gotostreaming ) ) {
+        new_state = PREPARE_STREAMING;
+        if( remove( gotostreaming.c_str() ) != 0 )
+            cerr << "home-security: Error removing file " << gotostreaming.c_str() << endl;
+        else
+            cout << "home-security: File " << gotostreaming.c_str() << " removed"  << endl;
+    }
+
+    if( new_state != state )
+        cout << "home-security: State changed from " << state << " to " << new_state << endl;
+
+    return( new_state );
 }
 
 int main( int argc, char** argv )
@@ -352,6 +377,8 @@ int main( int argc, char** argv )
                 program_running = false;
                 break;
         }
+
+        state = handleStateChangeEvents( state );
     }
 
     /*

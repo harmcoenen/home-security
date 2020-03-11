@@ -130,8 +130,9 @@ void hsRTSP::startStreaming()
 // stopStreaming
 void hsRTSP::stopStreaming()
 {
-    if( g_main_loop_is_running( mServingLoop ) )
-        g_main_loop_quit( mServingLoop );
+    if( mServingLoop != NULL )
+        if( g_main_loop_is_running( mServingLoop ) )
+            g_main_loop_quit( mServingLoop );
     mStreaming = false;
 }
 
