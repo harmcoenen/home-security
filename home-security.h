@@ -26,8 +26,8 @@ static const char *uploads_subdir = "upl";
 static const char *extension_photo = "_jn.jpeg";
 static const char *delimiter = "\n";
 
-static const string& gotodetection = "./gotodetection";
-static const string& gotostreaming = "./gotostreaming";
+static const string& gotodetection = "gotodetection";
+static const string& gotostreaming = "gotostreaming";
 
 enum States {
     PREPARE_DETECTION,
