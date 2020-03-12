@@ -137,8 +137,9 @@ int countInterestingObjects( const int numDetections, detectNet::Detection* dete
 States handleStatePrepareDetection( hsRTSP* rtsp_stream, gstCamera* camera ) {
     States new_state = DETECTION;
 
-    if( rtsp_stream->isStreaming() )
-        rtsp_stream->stopStreaming();
+    if( rtsp_stream )
+        if( rtsp_stream->isStreaming() )
+            rtsp_stream->stopStreaming();
 
     if( !camera ) {
         cerr << "home-security: failed to initialize camera device" << endl;
@@ -233,11 +234,18 @@ void handleStateDetection( hsDetection &hs_detection, gstCamera* camera, detectN
 States handleStatePrepareStreaming( hsRTSP* rtsp_stream, gstCamera* camera) {
     States new_state = STREAMING;
 
-    camera->Close();
+    if( camera )
+        camera->Close();
 
-    if( !rtsp_stream->isStreaming() ) {
-        thread rtspStreamthread( rtspStreamLoop, rtsp_stream );
-        rtspStreamthread.detach();
+    if( !rtsp_stream ) {
+        cerr << "home-security: failed to initialize RTSP stream" << endl;
+        new_state = STOPPING;
+    } else {
+        cout << "home-security: successfully initialized RTSP device" << endl;
+        if( !rtsp_stream->isStreaming() ) {
+            thread rtspStreamthread( rtspStreamLoop, rtsp_stream );
+            rtspStreamthread.detach();
+        }
     }
 
     return( new_state );
@@ -303,6 +311,11 @@ int main( int argc, char** argv )
     gstCamera* camera = NULL;
 
     /*
+     * Prepare a RTSP stream
+     */
+    hsRTSP* rtsp_stream = NULL;
+
+    /*
      * Create detection network
      */
     detectNet* net = detectNet::Create( argc, argv );
@@ -321,28 +334,16 @@ int main( int argc, char** argv )
      */
     const uint32_t overlayFlags = detectNet::OverlayFlagsFromStr( cmdLine.GetString( "overlay", "box,labels,conf" ) );
 
-
+    /*
+     * Home Security detection 
+     */
     hsDetection hs_detection;
 
+    /*
+     * FTP threads for upload and cleanup FTP server
+     */
     thread ftpUploadthread( ftpUploadLoop, cmdLine.GetString( "user", "user" ), cmdLine.GetString( "password", "password" ) );
     thread ftpCleanupthread( ftpCleanupLoop, cmdLine.GetString( "user", "user" ), cmdLine.GetString( "password", "password" ) );
-
-    /*
-     * Create the RTSP stream
-     */
-    hsRTSP* rtsp_stream = hsRTSP::Create( cmdLine.GetString( "user", "user" ),
-                                          cmdLine.GetString( "password", "password" ),
-                                          cmdLine.GetString( "ipaddr", hsRTSP::DefaultRtspIpAddress ),
-                                          cmdLine.GetString( "port", hsRTSP::DefaultRtspPort ),
-                                          cmdLine.GetInt( "width", hsRTSP::DefaultWidth ),
-                                          cmdLine.GetInt( "height", hsRTSP::DefaultHeight ),
-                                          cmdLine.GetString( "camera" )
-                                          );
-    if( !rtsp_stream )
-    {
-        cerr << "home-security: failed to create RTSP stream" << endl;
-        return 0;
-    }
 
     /*
      * Start in the prepare detection state
@@ -356,7 +357,6 @@ int main( int argc, char** argv )
     {
         switch (state)  {
             case PREPARE_DETECTION:
-                cout << "home-security: State machine case PREPARE_DETECTION " << state << endl;
                 /*
                  * Create the camera device
                  */
@@ -365,37 +365,36 @@ int main( int argc, char** argv )
                                             cmdLine.GetInt( "height", gstCamera::DefaultHeight ),
                                             cmdLine.GetString( "camera" ) );
                 state = handleStatePrepareDetection( rtsp_stream , camera );
-                if( camera == NULL ) {
-                    cout << "home-security: camera is NULL" << endl;
-                } else {
-                    cout << "home-security: camera is DEFINED" << endl;
-                }
                 break;
             case DETECTION:
-                cout << "home-security: State machine case DETECTION " << state << endl;
                 handleStateDetection( hs_detection, camera, net, overlayFlags );
                 break;
             case PREPARE_STREAMING:
-                cout << "home-security: State machine case PREPARE_STREAMING " << state << endl;
+                /*
+                 * Create the RTSP stream
+                 */
+                SAFE_DELETE( rtsp_stream );
+                rtsp_stream = hsRTSP::Create( cmdLine.GetString( "user", "user" ),
+                                              cmdLine.GetString( "password", "password" ),
+                                              cmdLine.GetString( "ipaddr", hsRTSP::DefaultRtspIpAddress ),
+                                              cmdLine.GetString( "port", hsRTSP::DefaultRtspPort ),
+                                              cmdLine.GetInt( "width", hsRTSP::DefaultWidth ),
+                                              cmdLine.GetInt( "height", hsRTSP::DefaultHeight ),
+                                              cmdLine.GetString( "camera" ) );
                 state = handleStatePrepareStreaming( rtsp_stream , camera);
                 break;
             case STREAMING:
-                cout << "home-security: State machine case STREAMING " << state << endl;
                 handleStateStreaming( rtsp_stream );
                 break;
             case STOPPING:
-                cout << "home-security: State machine case STOPPING " << state << endl;
                 program_running = false;
                 break;
             default:
-                cerr << "home-security: default unknown state " << state << endl;
                 program_running = false;
                 break;
         }
 
-        cout << "home-security: End of switch in state machine, current state is " << state << endl;
         state = handleStateChangeEvents( state );
-        cout << "home-security: End ofhandleStateChangeEvents, current/new state is " << state << endl;
     }
 
     /*
@@ -406,7 +405,10 @@ int main( int argc, char** argv )
         ftpUploadthread.join();
     if( ftpCleanupthread.joinable() )
         ftpCleanupthread.join();
-    rtsp_stream->stopStreaming();
+    if( camera )
+        camera->Close();
+    if( rtsp_stream )
+        rtsp_stream->stopStreaming();
 
     /*
      * Destroy resources
