@@ -121,10 +121,12 @@ int countInterestingObjects( const int numDetections, detectNet::Detection* dete
     /*
      * Loop through the detections to find a match with interesting objects
      */
-    for( int n=0; n < numDetections; n++ )
+    for( int n=0; n < numDetections; n++ ) {
+        cout << "home-security: object " << ( n+1 ) << " of " << numDetections << " is a " << net->GetClassDesc( detections[n].ClassID ) << endl;
         if( ( strcmp( net->GetClassDesc( detections[n].ClassID ), "person" ) == 0 ) ||
             ( strcmp( net->GetClassDesc( detections[n].ClassID ), "dog"    ) == 0 ) )
             interestingObjects++;
+    }
 
     /*
      * Print the number of detected objects
@@ -165,7 +167,7 @@ void handleStateDetection( hsDetection &hs_detection, gstCamera* camera, detectN
     /* 
      * Wait some time before each detection to keep the device cool
      */
-    std::this_thread::sleep_for( std::chrono::seconds( 1 ) );
+    std::this_thread::sleep_for( std::chrono::milliseconds( 500 ) );
 
     hs_detection.handleTimeSlice();
 
