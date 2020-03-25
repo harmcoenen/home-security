@@ -60,6 +60,7 @@ int usage()
 void ftpUploadLoop( const char* username, const char* password ) {
     int progress = 0;
     int boundary = 60; /* 60 seconds is one minute */
+    int nUplFiles = 0;
     /*
      * Setup FTP and its credentials
      */
@@ -77,7 +78,9 @@ void ftpUploadLoop( const char* username, const char* password ) {
         progress++;
         if( (progress % boundary) == 0 ) {
             progress = 0;
-            cout << "home-security: Uploaded " << hs_ftp_upload.uploadFiles() << " files" << endl;
+            nUplFiles = hs_ftp_upload.uploadFiles();
+            if ( nUplFiles > 0 )
+                cout << "home-security: Uploaded " << nUplFiles << " files" << endl;
         }
     }
 
@@ -123,8 +126,10 @@ int countInterestingObjects( const int numDetections, detectNet::Detection* dete
      */
     for( int n=0; n < numDetections; n++ ) {
         cout << "home-security: object " << ( n+1 ) << " of " << numDetections << " is a " << net->GetClassDesc( detections[n].ClassID ) << endl;
-        if( ( strcmp( net->GetClassDesc( detections[n].ClassID ), "person" ) == 0 ) ||
-            ( strcmp( net->GetClassDesc( detections[n].ClassID ), "dog"    ) == 0 ) )
+        if( ( strcmp( net->GetClassDesc( detections[n].ClassID ), "person"  ) == 0 ) ||
+            ( strcmp( net->GetClassDesc( detections[n].ClassID ), "bicycle" ) == 0 ) ||
+            ( strcmp( net->GetClassDesc( detections[n].ClassID ), "car"     ) == 0 ) ||
+            ( strcmp( net->GetClassDesc( detections[n].ClassID ), "dog"     ) == 0 ) )
             interestingObjects++;
     }
 
