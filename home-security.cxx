@@ -126,10 +126,12 @@ int countInterestingObjects( const int numDetections, detectNet::Detection* dete
      */
     for( int n=0; n < numDetections; n++ ) {
         cout << "home-security: object " << ( n+1 ) << " of " << numDetections << " is a " << net->GetClassDesc( detections[n].ClassID ) << endl;
-        if( ( strcmp( net->GetClassDesc( detections[n].ClassID ), "person"  ) == 0 ) ||
-            ( strcmp( net->GetClassDesc( detections[n].ClassID ), "bicycle" ) == 0 ) ||
-            ( strcmp( net->GetClassDesc( detections[n].ClassID ), "car"     ) == 0 ) ||
-            ( strcmp( net->GetClassDesc( detections[n].ClassID ), "dog"     ) == 0 ) )
+        if( ( strcmp( net->GetClassDesc( detections[n].ClassID ), "motorcycle" ) == 0 ) ||
+            ( strcmp( net->GetClassDesc( detections[n].ClassID ), "bicycle"    ) == 0 ) ||
+            ( strcmp( net->GetClassDesc( detections[n].ClassID ), "person"     ) == 0 ) ||
+            ( strcmp( net->GetClassDesc( detections[n].ClassID ), "truck"      ) == 0 ) ||
+            ( strcmp( net->GetClassDesc( detections[n].ClassID ), "car"        ) == 0 ) ||
+            ( strcmp( net->GetClassDesc( detections[n].ClassID ), "dog"        ) == 0 ) )
             interestingObjects++;
     }
 
