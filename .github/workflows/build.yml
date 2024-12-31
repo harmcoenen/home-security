@@ -1,5 +1,10 @@
 name: "Build"
 
+# Workflow level environment variables.
+env:
+  user_name: 'Harry Jenkins'
+  demo_name: 'Demon Stration'
+  
 on:
   push:
     branches: [ master ]
@@ -19,7 +24,12 @@ jobs:
   greet_user:
     runs-on: ubuntu-latest
     steps:
-    - run: echo "Hi, ${{ github.event.inputs.name }} from ${{ github.event.inputs.country }}"
+    - name: Greet user
+      run: echo "Hi, ${{ github.event.inputs.name }} from ${{ github.event.inputs.country }}"
+    - name: Print environment variables
+      run: |
+        echo "Variable user_name is [$user_name]"
+        echo "Variable demo_name is [$demo_name]"
 
   build:
     runs-on: ubuntu-latest
@@ -36,7 +46,7 @@ jobs:
         run: |
           pwd
           ls -hal
-      # Nameless run
+      # Nameless run, so the first line will become the run name
       - run: |
           cmake --version
           make --version
