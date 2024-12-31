@@ -23,6 +23,8 @@ jobs:
 
   build:
     runs-on: ubuntu-latest
+    # Create a dependency because by default all jobs run in parallel
+    needs: greet_user
     steps:
       # Checks-out your repository under $GITHUB_WORKSPACE, so  your job can access it.
       - uses: actions/checkout@v4
