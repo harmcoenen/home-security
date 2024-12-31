@@ -1,9 +1,7 @@
 name: "Build"
 
-# Workflow level environment variables.
-env:
-  user_name: 'Harry Jenkins'
-  demo_name: 'Demon Stration'
+env: # Workflow level environment variables.
+  workflow_var: 'Workflow variable value'
   
 on:
   push:
@@ -23,13 +21,18 @@ on:
 jobs:
   greet_user:
     runs-on: ubuntu-latest
+    env: # Job level environment variables.
+      job_var: "Job variable value"
     steps:
     - name: Greet user
       run: echo "Hi, ${{ github.event.inputs.name }} from ${{ github.event.inputs.country }}"
     - name: Print environment variables
       run: |
-        echo "Variable user_name is [$user_name]"
-        echo "Variable demo_name is [$demo_name]"
+        echo "Variable workflow_var is [$workflow_var]"
+        echo "Variable job_var is [$job_var]"
+        echo "Variable step_var is [$step_var]"
+      env: # Step level environment variables.
+        step_var: "Step variable value"
 
   build:
     runs-on: ubuntu-latest
