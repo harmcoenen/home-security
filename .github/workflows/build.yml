@@ -4,6 +4,7 @@ name: "Build"
 env: # Workflow level environment variables.
   workflow_var: 'Workflow variable value'
   
+# on: [push, pull_request]
 on:
   push:
     branches: [ master ]
