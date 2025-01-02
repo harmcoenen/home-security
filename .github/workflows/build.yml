@@ -21,18 +21,34 @@ on:
 jobs:
   greet_user:
     runs-on: ubuntu-latest
-    env: # Job level environment variables.
-      job_var: "Job variable value"
     steps:
     - name: Greet user
       run: echo "Hi, ${{ github.event.inputs.name }} from ${{ github.event.inputs.country }}"
-    - name: Print environment variables
+
+  environment_variables:
+    runs-on: ubuntu-latest
+    env: # Job level environment variables.
+      job_var: "Job variable value"
+    steps:
+    - name: Print initial variables
       run: |
         echo "Variable workflow_var is [$workflow_var]"
         echo "Variable job_var is [$job_var]"
         echo "Variable step_var is [$step_var]"
       env: # Step level environment variables.
         step_var: "Step variable value"
+    - name: Overwrite workflow and job variables
+      run: | 
+        echo "::set-env name=workflow_var::Overwritten workflow variable value"
+        echo "::set-env name=job_var::Overwritten job variable value"
+    - name: Create new variable
+      run: echo "::set-env name=new_var::Entirly new variable"
+    - name: Print final variables
+      run: |
+        echo "Variable workflow_var is [$workflow_var]"
+        echo "Variable job_var is [$job_var]"
+        echo "Variable step_var is [$step_var]"
+        echo "Variable new_var is [$new_var]"
 
   build:
     runs-on: ubuntu-latest
