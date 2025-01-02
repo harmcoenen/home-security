@@ -1,5 +1,6 @@
 name: "Build"
 
+# Environment variables are case sensitive.
 env: # Workflow level environment variables.
   workflow_var: 'Workflow variable value'
   
@@ -30,42 +31,51 @@ jobs:
     env: # Job level environment variables.
       job_var: "Job variable value"
     steps:
-    - name: Print initial variables
+    - name: Print custom variables
       run: |
         echo "Variable workflow_var is [$workflow_var]"
         echo "Variable job_var is [$job_var]"
         echo "Variable step_var is [$step_var]"
       env: # Step level environment variables.
         step_var: "Step variable value"
-    - name: Overwrite workflow and job variables
-      run: | 
-        echo "::set-env name=workflow_var::Overwritten workflow variable value"
-        echo "::set-env name=job_var::Overwritten job variable value"
-    - name: Create new variable
-      run: echo "::set-env name=new_var::Entirly new variable"
-    - name: Print final variables
+    - name: Print default variables
       run: |
-        echo "Variable workflow_var is [$workflow_var]"
-        echo "Variable job_var is [$job_var]"
-        echo "Variable step_var is [$step_var]"
-        echo "Variable new_var is [$new_var]"
+        echo "CI is                 [$CI]"
+        echo "HOME is               [$HOME]"
+        echo "GITHUB_WORKFLOW is    [$GITHUB_WORKFLOW]"
+        echo "GITHUB_RUN_ID is      [$GITHUB_RUN_ID]"
+        echo "GITHUB_RUN_NUMBER is  [$GITHUB_RUN_NUMBER]"
+        echo "GITHUB_ACTION is      [$GITHUB_ACTION]"
+        echo "GITHUB_ACTIONS is     [$GITHUB_ACTIONS]"
+        echo "GITHUB_ACTOR is       [$GITHUB_ACTOR]"
+        echo "GITHUB_REPOSITORY is  [$GITHUB_REPOSITORY]"
+        echo "GITHUB_EVENT_NAME is  [$GITHUB_EVENT_NAME]"
+        echo "GITHUB_EVENT_PATH is  [$GITHUB_EVENT_PATH]"
+        echo "GITHUB_WORKSPACE is   [$GITHUB_WORKSPACE]"
+        echo "GITHUB_SHA is         [$GITHUB_SHA]"
+        echo "GITHUB_REF is         [$GITHUB_REF]"
+        echo "GITHUB_HEAD_REF is    [$GITHUB_HEAD_REF]"
+        echo "GITHUB_BASE_REF is    [$GITHUB_BASE_REF]"
+        echo "GITHUB_SERVER_URL is  [$GITHUB_SERVER_URL]"
+        echo "GITHUB_API_URL is     [$GITHUB_API_URL]"
+        echo "GITHUB_GRAPHQL_URL is [$GITHUB_GRAPHQL_URL]"
 
   build:
     runs-on: ubuntu-latest
-    # Create a dependency because by default all jobs run in parallel
+    # Create a dependency because by default all jobs run in parallel.
     needs: greet_user
     steps:
       # Checks-out your repository under $GITHUB_WORKSPACE, so  your job can access it.
       - uses: actions/checkout@v4
-      # Runs a single command using the runners shell
+      # Runs a single command using the runners shell.
       - name: Run a one-line script
         run: echo "Start build for workspace $GITHUB_WORKSPACE"
-      # Runs a set of commands using the runners shell
+      # Runs a set of commands using the runners shell.
       - name: Run a multi-line script
         run: |
           pwd
           ls -hal
-      # Nameless run, so the first line will become the run name
+      # Nameless run, so the first line will become the run name.
       - run: |
           cmake --version
           make --version
